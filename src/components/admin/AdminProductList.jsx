@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { getProducts, deleteProduct } from '../../utils/productStore';
+import { useProducts } from '../../context/ProductContext';
 import { CATEGORIES } from '../../data/products';
 import {
   Search,
@@ -9,17 +9,17 @@ import {
   AlertCircle,
   CheckCircle,
   X,
+  RefreshCw,
+  Loader2,
 } from 'lucide-react';
 
 export default function AdminProductList({ onEditProduct }) {
-  const [products, setProducts] = useState(() => getProducts());
+  const { products, loading, deleteProduct, refreshProducts } = useProducts();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [successMsg, setSuccessMsg] = useState('');
-
-  // Refresh products from store
-  const refreshProducts = () => setProducts(getProducts());
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Filtered products
   const filtered = useMemo(() => {
@@ -45,12 +45,13 @@ export default function AdminProductList({ onEditProduct }) {
   const lowStock = products.filter((p) => (p.stock || 0) <= 5).length;
   const limitedDrops = products.filter((p) => p.isLimited).length;
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!deleteTarget) return;
-    deleteProduct(deleteTarget.id);
-    refreshProducts();
-    setDeleteTarget(null);
+    setIsDeleting(true);
+    await deleteProduct(deleteTarget.id);
+    setIsDeleting(false);
     setSuccessMsg(`"${deleteTarget.name}" has been deleted.`);
+    setDeleteTarget(null);
     setTimeout(() => setSuccessMsg(''), 3000);
   };
 

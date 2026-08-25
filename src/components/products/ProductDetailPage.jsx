@@ -23,7 +23,7 @@ import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import { useToast } from '../../context/ToastContext';
 import { useSoundFX } from '../../hooks/useSoundFX';
-import { PRODUCTS } from '../../data/products';
+import { useProducts } from '../../context/ProductContext';
 import ProductCard from './ProductCard';
 
 export default function ProductDetailPage({
@@ -38,6 +38,7 @@ export default function ProductDetailPage({
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { addToast } = useToast();
   const { playClick, playHover, playSuccessChime } = useSoundFX();
+  const { products } = useProducts();
 
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [selectedColor, setSelectedColor] = useState(
@@ -70,7 +71,7 @@ export default function ProductDetailPage({
   const images = product.images || [];
 
   // Related products from same or different categories
-  const relatedProducts = PRODUCTS.filter((p) => p.id !== product.id).slice(0, 3);
+  const relatedProducts = (products || []).filter((p) => p.id !== product.id).slice(0, 3);
 
   const handleColorChange = (color) => {
     playClick(1400);

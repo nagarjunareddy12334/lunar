@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { PRODUCTS, TEE_BUNDLES } from '../../data/products';
+import React, { useState, useEffect } from 'react';
+import { TEE_BUNDLES } from '../../data/products';
+import { useProducts } from '../../context/ProductContext';
 import { formatPrice } from '../../utils/formatters';
 import { useCart } from '../../context/CartContext';
 import { useToast } from '../../context/ToastContext';
@@ -8,16 +9,26 @@ import { Sparkles, Layers, ShoppingBag, ArrowRight, Check } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 export default function LookbookBuilder() {
+  const { products } = useProducts();
   const { addToCart, setIsCartOpen } = useCart();
   const { addToast } = useToast();
   const { playClick, playHover, playSuccessChime } = useSoundFX();
 
-  const graphicOptions = PRODUCTS.filter((p) => p.category === 'graphic' || p.category === 'vintage');
-  const minimalOptions = PRODUCTS.filter((p) => p.category === 'minimal' || p.category === 'oversized');
+  const graphicOptions = (products || []).filter((p) => p.category === 'graphic' || p.category === 'vintage');
+  const minimalOptions = (products || []).filter((p) => p.category === 'minimal' || p.category === 'oversized');
 
   // Active selections
-  const [selectedTee1, setSelectedTee1] = useState(graphicOptions[0] || PRODUCTS[0]);
-  const [selectedTee2, setSelectedTee2] = useState(minimalOptions[0] || PRODUCTS[1]);
+  const [selectedTee1, setSelectedTee1] = useState(null);
+  const [selectedTee2, setSelectedTee2] = useState(null);
+
+  useEffect(() => {
+    if (!selectedTee1 && (products || []).length > 0) {
+      setSelectedTee1(graphicOptions[0] || products[0]);
+    }
+    if (!selectedTee2 && (products || []).length > 0) {
+      setSelectedTee2(minimalOptions[0] || products[1] || products[0]);
+    }
+  }, [products]);
 
   const [size1, setSize1] = useState('L');
   const [size2, setSize2] = useState('L');
@@ -139,7 +150,7 @@ export default function LookbookBuilder() {
                   value={selectedTee1?.id}
                   onChange={(e) => {
                     playClick(1300);
-                    const match = PRODUCTS.find((p) => p.id === e.target.value);
+                    const match = (products || []).find((p) => p.id === e.target.value);
                     if (match) setSelectedTee1(match);
                   }}
                   className="w-full bg-slate-900 text-slate-200 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-mono uppercase outline-none focus:border-white transition-colors cursor-pointer"
@@ -173,7 +184,7 @@ export default function LookbookBuilder() {
                   value={selectedTee2?.id}
                   onChange={(e) => {
                     playClick(1300);
-                    const match = PRODUCTS.find((p) => p.id === e.target.value);
+                    const match = (products || []).find((p) => p.id === e.target.value);
                     if (match) setSelectedTee2(match);
                   }}
                   className="w-full bg-slate-900 text-slate-200 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-mono uppercase outline-none focus:border-white transition-colors cursor-pointer"

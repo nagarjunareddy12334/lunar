@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { PRODUCTS } from '../../data/products';
+import { useProducts } from '../../context/ProductContext';
 import FilterBar from './FilterBar';
 import ProductCard from './ProductCard';
-import { RotateCcw, PackageSearch, Sparkles, LayoutGrid, Grid3X3, Grid2X2 } from 'lucide-react';
+import { RotateCcw, PackageSearch, Sparkles, LayoutGrid, Grid3X3, Grid2X2, Loader2 } from 'lucide-react';
 import { useSoundFX } from '../../hooks/useSoundFX';
 
 export default function ProductCatalog({
@@ -12,6 +12,7 @@ export default function ProductCatalog({
   activeCategory = 'all',
   onCategoryChange
 }) {
+  const { products, loading } = useProducts();
   const [selectedCategory, setSelectedCategory] = useState(activeCategory);
   const [selectedGsm, setSelectedGsm] = useState('all');
   const [selectedSize, setSelectedSize] = useState('all');
@@ -37,7 +38,7 @@ export default function ProductCatalog({
 
   // Filter & Sort Pipeline
   const filteredProducts = useMemo(() => {
-    return PRODUCTS.filter((item) => {
+    return products.filter((item) => {
       // Category Filter
       if (selectedCategory !== 'all' && item.category !== selectedCategory) {
         return false;

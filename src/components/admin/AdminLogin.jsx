@@ -32,14 +32,16 @@ export default function AdminLogin() {
 
     setIsLoading(true);
 
-    // Simulate a brief loading state for realism
-    await new Promise((r) => setTimeout(r, 600));
-
-    const result = login(username.trim(), password);
-    if (result.success) {
-      navigate('/admin/dashboard', { replace: true });
-    } else {
-      setError('Invalid credentials. Access denied.');
+    try {
+      const result = await login(username.trim(), password);
+      if (result.success) {
+        navigate('/admin/dashboard', { replace: true });
+      } else {
+        setError(result.error || 'Invalid credentials. Access denied.');
+        setIsLoading(false);
+      }
+    } catch (err) {
+      setError(err.message || 'An unexpected error occurred.');
       setIsLoading(false);
     }
   };
@@ -65,16 +67,16 @@ export default function AdminLogin() {
             </div>
           )}
 
-          {/* Username */}
+          {/* Username / Email */}
           <div className="admin-field">
             <label className="admin-label" htmlFor="admin-username">
-              Username
+              Username or Email
             </label>
             <input
               id="admin-username"
               className={`admin-input ${error ? 'admin-input-error' : ''}`}
               type="text"
-              placeholder="Enter admin username"
+              placeholder="admin or admin@lunar.com"
               value={username}
               onChange={(e) => {
                 setUsername(e.target.value);
@@ -139,15 +141,40 @@ export default function AdminLogin() {
                 Authenticating...
               </span>
             ) : (
-              'Access Dashboard'
+              'Access Admin Dashboard'
             )}
           </button>
+
+          {/* Quick Demo Credentials Fill Button */}
+          <div style={{ marginTop: '1rem', textAlign: 'center' }}>
+            <button
+              type="button"
+              onClick={() => {
+                setUsername('admin');
+                setPassword('lunar@2024');
+              }}
+              style={{
+                background: 'rgba(197, 168, 128, 0.1)',
+                border: '1px dashed rgba(197, 168, 128, 0.3)',
+                color: '#C5A880',
+                padding: '0.4rem 0.8rem',
+                borderRadius: '0.5rem',
+                fontSize: '0.72rem',
+                fontFamily: 'monospace',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+              title="Click to fill default admin login credentials"
+            >
+              ⚡ Quick Fill Admin (admin / lunar@2024)
+            </button>
+          </div>
 
           {/* Hint */}
           <p
             style={{
               textAlign: 'center',
-              marginTop: '1.5rem',
+              marginTop: '1rem',
               fontSize: '0.72rem',
               color: '#475569',
               letterSpacing: '0.05em',

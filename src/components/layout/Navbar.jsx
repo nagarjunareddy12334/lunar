@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Heart, ShoppingBag, Menu, X, Moon, Sparkles, Layers, SlidersHorizontal } from 'lucide-react';
+import { Search, Heart, ShoppingBag, Menu, X, Moon, Sparkles, User, Package } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
+import { useCustomerAuth } from '../../context/CustomerAuthContext';
 import { useSoundFX } from '../../hooks/useSoundFX';
 
 export default function Navbar({ onOpenSearch, onNavigate, onSelectCategory, onGoHome }) {
   const { setIsCartOpen, totalItemCount } = useCart();
   const { setIsWishlistOpen, wishlistCount } = useWishlist();
+  const { customer, isAuthenticated, openAuthModal, orders } = useCustomerAuth();
   const { playClick, playHover } = useSoundFX();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -34,6 +36,11 @@ export default function Navbar({ onOpenSearch, onNavigate, onSelectCategory, onG
         if (el) el.scrollIntoView({ behavior: 'smooth' });
       }
     }, 50);
+  };
+
+  const handleOpenOrders = () => {
+    playClick();
+    openAuthModal(isAuthenticated ? 'orders' : 'login');
   };
 
   return (
@@ -117,7 +124,7 @@ export default function Navbar({ onOpenSearch, onNavigate, onSelectCategory, onG
         </div>
 
         {/* Right Actions */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-2.5">
           {/* Search Button */}
           <button
             onClick={() => {
@@ -125,7 +132,7 @@ export default function Navbar({ onOpenSearch, onNavigate, onSelectCategory, onG
               onOpenSearch();
             }}
             onMouseEnter={playHover}
-            className="p-2.5 text-slate-300 hover:text-white hover:bg-white/5 rounded-full transition-all cursor-pointer"
+            className="p-2 sm:p-2.5 text-slate-300 hover:text-white hover:bg-white/5 rounded-full transition-all cursor-pointer"
             aria-label="Search collection"
             title="Search tees (⌘K)"
           >
@@ -139,16 +146,62 @@ export default function Navbar({ onOpenSearch, onNavigate, onSelectCategory, onG
               setIsWishlistOpen(true);
             }}
             onMouseEnter={playHover}
-            className="p-2.5 text-slate-300 hover:text-white hover:bg-white/5 rounded-full transition-all relative cursor-pointer"
+            className="p-2 sm:p-2.5 text-slate-300 hover:text-white hover:bg-white/5 rounded-full transition-all relative cursor-pointer"
             aria-label="Wishlist"
             title="Saved items"
           >
             <Heart className="w-5 h-5" />
             {wishlistCount > 0 && (
-              <span className="absolute 1 top-1 right-1 w-4 h-4 bg-rose-500 text-white font-bold text-[10px] rounded-full flex items-center justify-center shadow-sm">
+              <span className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 w-4 h-4 bg-rose-500 text-white font-bold text-[10px] rounded-full flex items-center justify-center shadow-sm">
                 {wishlistCount}
               </span>
             )}
+          </button>
+
+          {/* Dedicated Orders / My Orders Button */}
+          <button
+            onClick={handleOpenOrders}
+            onMouseEnter={playHover}
+            className={`p-2 sm:px-3 sm:py-2 rounded-full transition-all relative flex items-center gap-1.5 cursor-pointer border ${
+              isAuthenticated && orders?.length > 0
+                ? 'border-[#C5A880]/30 bg-[#C5A880]/10 text-slate-200 hover:bg-[#C5A880]/20 hover:text-white'
+                : 'border-transparent text-slate-300 hover:text-white hover:bg-white/5 hover:border-white/10'
+            }`}
+            aria-label="My Orders"
+            title={isAuthenticated ? `My Orders (${orders?.length || 0})` : 'My Orders (Sign in to view)'}
+          >
+            <div className="relative flex items-center justify-center">
+              <Package className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+              {isAuthenticated && orders?.length > 0 && (
+                <span className="absolute -top-2 -right-2.5 min-w-[15px] h-3.5 px-1 bg-[#C5A880] text-black font-extrabold text-[9px] rounded-full flex items-center justify-center shadow-md font-mono">
+                  {orders.length}
+                </span>
+              )}
+            </div>
+            <span className="hidden md:inline text-xs font-mono tracking-wider font-semibold">
+              Orders
+            </span>
+          </button>
+
+          {/* Customer Account Button */}
+          <button
+            onClick={() => {
+              playClick();
+              openAuthModal(isAuthenticated ? 'profile' : 'login');
+            }}
+            onMouseEnter={playHover}
+            className={`p-2 sm:px-3 sm:py-2 rounded-full transition-all flex items-center gap-2 cursor-pointer ${
+              isAuthenticated
+                ? 'bg-white/10 text-slate-200 border border-white/20 hover:bg-white/15 hover:text-white'
+                : 'text-slate-300 hover:text-white hover:bg-white/5'
+            }`}
+            aria-label="Customer Account"
+            title={isAuthenticated ? `Account: ${customer?.fullName || 'Profile'}` : 'Sign In / Register'}
+          >
+            <User className="w-4 h-4" />
+            <span className="hidden md:inline text-xs font-mono tracking-wider font-semibold">
+              {isAuthenticated ? (customer?.fullName?.split(' ')[0] || 'Account') : 'Sign In'}
+            </span>
           </button>
 
           {/* Bag / Cart Button */}
@@ -158,7 +211,7 @@ export default function Navbar({ onOpenSearch, onNavigate, onSelectCategory, onG
               setIsCartOpen(true);
             }}
             onMouseEnter={playHover}
-            className="flex items-center gap-2.5 px-4 py-2 bg-white/10 hover:bg-white/15 border border-white/15 hover:border-white/30 rounded-full transition-all text-slate-100 hover:text-white cursor-pointer group"
+            className="flex items-center gap-2 sm:gap-2.5 px-3 sm:px-4 py-2 bg-white/10 hover:bg-white/15 border border-white/15 hover:border-white/30 rounded-full transition-all text-slate-100 hover:text-white cursor-pointer group"
             aria-label="Shopping bag"
           >
             <div className="relative">
@@ -191,6 +244,43 @@ export default function Navbar({ onOpenSearch, onNavigate, onSelectCategory, onG
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
         <div className="lg:hidden fixed inset-x-0 top-full bg-[#090A0F]/98 border-b border-slate-800 backdrop-blur-2xl px-6 py-8 shadow-2xl transition-all animate-fadeIn">
+          {/* Mobile Customer Status & Quick Actions */}
+          <div className="mb-5 pb-5 border-b border-slate-800 flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  playClick();
+                  openAuthModal(isAuthenticated ? 'profile' : 'login');
+                }}
+                className="flex items-center gap-2 text-xs font-mono text-[#C5A880] cursor-pointer hover:underline"
+              >
+                <User className="w-4 h-4" />
+                <span>{isAuthenticated ? `Account: ${customer?.fullName || customer?.email}` : 'Sign In / Register Account'}</span>
+              </button>
+            </div>
+
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                handleOpenOrders();
+              }}
+              className="flex items-center justify-between p-3 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-[#C5A880]/50 text-xs font-mono uppercase tracking-wider text-slate-200 transition-colors cursor-pointer"
+            >
+              <div className="flex items-center gap-2">
+                <Package className="w-4 h-4 text-[#C5A880]" />
+                <span>My Orders</span>
+              </div>
+              {isAuthenticated && orders?.length > 0 ? (
+                <span className="px-2 py-0.5 rounded-full bg-[#C5A880] text-black text-[10px] font-extrabold font-mono">
+                  {orders.length} {orders.length === 1 ? 'ORDER' : 'ORDERS'}
+                </span>
+              ) : (
+                <span className="text-[10px] text-slate-400">Track & View &rarr;</span>
+              )}
+            </button>
+          </div>
+
           <div className="flex flex-col gap-4 text-sm tracking-[0.2em] uppercase font-medium text-slate-300">
             <button
               onClick={() => handleLinkClick('catalog', 'all')}

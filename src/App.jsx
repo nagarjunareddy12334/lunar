@@ -4,6 +4,8 @@ import { ToastProvider } from './context/ToastContext';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { AdminAuthProvider } from './context/AdminAuthContext';
+import { CustomerAuthProvider } from './context/CustomerAuthContext';
+import { ProductProvider } from './context/ProductContext';
 
 import Navbar from './components/layout/Navbar';
 import HeroSection from './components/hero/HeroSection';
@@ -23,6 +25,7 @@ import CartDrawer from './components/cart/CartDrawer';
 import CheckoutModal from './components/cart/CheckoutModal';
 import WishlistDrawer from './components/wishlist/WishlistDrawer';
 import SearchModal from './components/ui/SearchModal';
+import CustomerModal from './components/customer/CustomerModal';
 
 import AdminLogin from './components/admin/AdminLogin';
 import AdminDashboard from './components/admin/AdminDashboard';
@@ -123,6 +126,8 @@ function Storefront() {
         onClose={() => setIsCheckoutOpen(false)}
       />
 
+      <CustomerModal />
+
       <SearchModal
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
@@ -138,24 +143,28 @@ export default function App() {
   return (
     <BrowserRouter>
       <ToastProvider>
-        <CartProvider>
-          <WishlistProvider>
-            <AdminAuthProvider>
-              <Routes>
-                {/* Public Storefront */}
-                <Route path="/" element={<Storefront />} />
+        <ProductProvider>
+          <CartProvider>
+            <WishlistProvider>
+              <CustomerAuthProvider>
+                <AdminAuthProvider>
+                  <Routes>
+                    {/* Public Storefront */}
+                    <Route path="/" element={<Storefront />} />
 
-                {/* Admin Portal */}
-                <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
-                <Route path="/admin/login" element={<AdminLogin />} />
-                <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                    {/* Admin Portal */}
+                    <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
+                    <Route path="/admin/login" element={<AdminLogin />} />
+                    <Route path="/admin/dashboard" element={<AdminDashboard />} />
 
-                {/* Catch-all redirect to Home */}
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </AdminAuthProvider>
-          </WishlistProvider>
-        </CartProvider>
+                    {/* Catch-all redirect to Home */}
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                  </Routes>
+                </AdminAuthProvider>
+              </CustomerAuthProvider>
+            </WishlistProvider>
+          </CartProvider>
+        </ProductProvider>
       </ToastProvider>
     </BrowserRouter>
   );

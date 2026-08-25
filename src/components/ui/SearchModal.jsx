@@ -1,12 +1,13 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Search, X, ArrowRight, Sparkles } from 'lucide-react';
-import { PRODUCTS } from '../../data/products';
+import { useProducts } from '../../context/ProductContext';
 import { formatPrice } from '../../utils/formatters';
 import { useScrollLock } from '../../hooks/useScrollLock';
 
 const TRENDING_TAGS = ['Oversized', 'Graphic Tees', '360 GSM', 'Acid Wash', 'Boxy Fit', 'Vintage Washed'];
 
 export default function SearchModal({ isOpen, onClose, onSelectProduct }) {
+  const { products } = useProducts();
   useScrollLock(isOpen);
   const [query, setQuery] = useState('');
   const inputRef = useRef(null);
@@ -22,7 +23,7 @@ export default function SearchModal({ isOpen, onClose, onSelectProduct }) {
   const searchResults = useMemo(() => {
     if (!query.trim()) return [];
     const q = query.toLowerCase();
-    return PRODUCTS.filter(
+    return products.filter(
       (p) =>
         p.name.toLowerCase().includes(q) ||
         p.category.toLowerCase().includes(q) ||

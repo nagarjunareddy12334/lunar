@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { CATEGORIES, SIZES } from '../../data/products';
-import { addProduct, updateProduct } from '../../utils/productStore';
+import { useProducts } from '../../context/ProductContext';
+import { uploadProductImage } from '../../utils/productStore';
 import {
   Package,
   DollarSign,
   Tag,
-  Image,
+  Image as ImageIcon,
   Palette,
   FileText,
   Settings,
@@ -15,6 +16,15 @@ import {
   CheckCircle,
   AlertCircle,
   ArrowLeft,
+  Loader2,
+  UploadCloud,
+  Upload,
+  Trash2,
+  MoveLeft,
+  MoveRight,
+  Link as LinkIcon,
+  Sparkles,
+  Info,
 } from 'lucide-react';
 
 const CATEGORY_OPTIONS = CATEGORIES.filter((c) => c.id !== 'all');
@@ -43,7 +53,7 @@ function getEmptyProduct() {
     sizes: ['M', 'L', 'XL'],
     isNew: true,
     isLimited: false,
-    images: ['', '', ''],
+    images: [],
     colors: [{ name: '', hex: '#0B0C10', image: '' }],
     specs: {
       fabric: '',
@@ -59,6 +69,18 @@ function getEmptyProduct() {
 
 export default function AdminProductForm({ editProduct, onDone, onCancel }) {
   const isEdit = Boolean(editProduct);
+  const { addProduct, updateProduct } = useProducts();
+  const fileInputRef = useRef(null);
+  const colorFileInputRefs = useRef({});
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadingColorIdx, setUploadingColorIdx] = useState(null);
+  const [dragOver, setDragOver] = useState(false);
+  const [showUrlInput, setShowUrlInput] = useState(false);
+  const [customUrlInput, setCustomUrlInput] = useState('');
+  const [storageNotice, setStorageNotice] = useState('');
+
   const [form, setForm] = useState(() => {
     if (editProduct) {
       return {
@@ -69,10 +91,9 @@ export default function AdminProductForm({ editProduct, onDone, onCancel }) {
           : '',
         gsm: String(editProduct.gsm || ''),
         stock: String(editProduct.stock || ''),
-        images: [
-          ...(editProduct.images || []),
-          ...Array(3).fill(''),
-        ].slice(0, 3),
+        images: Array.isArray(editProduct.images)
+          ? editProduct.images.filter(Boolean)
+          : [],
         colors: editProduct.colors?.length
           ? editProduct.colors.map((c) => ({ ...c }))
           : [{ name: '', hex: '#0B0C10', image: '' }],
@@ -87,6 +108,7 @@ export default function AdminProductForm({ editProduct, onDone, onCancel }) {
 
   const [errors, setErrors] = useState({});
   const [successMsg, setSuccessMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
 
   // ─── Field update helpers ──────────────────────
   const set = (field, value) => {
@@ -101,12 +123,106 @@ export default function AdminProductForm({ editProduct, onDone, onCancel }) {
     }));
   };
 
-  const setImage = (idx, value) => {
+  // ─── Image upload & management helpers ─────────
+  const handleFilesUpload = async (files) => {
+    if (!files || files.length === 0) return;
+    setIsUploading(true);
+    setStorageNotice('');
+
+    const newUrls = [];
+    for (const file of Array.from(files)) {
+      if (!file.type.startsWith('image/')) continue;
+      const res = await uploadProductImage(file);
+      if (res.url) {
+        newUrls.push(res.url);
+      }
+      if (res.notice) {
+        setStorageNotice(res.notice);
+      }
+    }
+
+    if (newUrls.length > 0) {
+      setForm((f) => {
+        const current = (f.images || []).filter((img) => img && img.trim());
+        return { ...f, images: [...current, ...newUrls] };
+      });
+      setErrors((e) => ({ ...e, images: undefined }));
+    }
+    setIsUploading(false);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOver(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOver(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOver(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleFilesUpload(e.dataTransfer.files);
+    }
+  };
+
+  const removeImageAt = (idx) => {
+    setForm((f) => ({
+      ...f,
+      images: f.images.filter((_, i) => i !== idx),
+    }));
+  };
+
+  const makeCover = (idx) => {
+    if (idx === 0) return;
     setForm((f) => {
-      const images = [...f.images];
-      images[idx] = value;
-      return { ...f, images };
+      const copy = [...f.images];
+      const [item] = copy.splice(idx, 1);
+      copy.unshift(item);
+      return { ...f, images: copy };
     });
+  };
+
+  const moveImage = (idx, direction) => {
+    setForm((f) => {
+      const copy = [...f.images];
+      const targetIdx = idx + direction;
+      if (targetIdx < 0 || targetIdx >= copy.length) return f;
+      const temp = copy[idx];
+      copy[idx] = copy[targetIdx];
+      copy[targetIdx] = temp;
+      return { ...f, images: copy };
+    });
+  };
+
+  const addUrlImage = () => {
+    if (!customUrlInput.trim()) return;
+    setForm((f) => {
+      const cleanExisting = (f.images || []).filter((img) => img && img.trim());
+      return { ...f, images: [...cleanExisting, customUrlInput.trim()] };
+    });
+    setCustomUrlInput('');
+    setShowUrlInput(false);
+    setErrors((e) => ({ ...e, images: undefined }));
+  };
+
+  const handleColorUpload = async (file, colorIdx) => {
+    if (!file) return;
+    setUploadingColorIdx(colorIdx);
+    const res = await uploadProductImage(file);
+    if (res.url) {
+      setColor(colorIdx, 'image', res.url);
+    }
+    if (res.notice) {
+      setStorageNotice(res.notice);
+    }
+    setUploadingColorIdx(null);
   };
 
   const setColor = (idx, field, value) => {
@@ -168,7 +284,10 @@ export default function AdminProductForm({ editProduct, onDone, onCancel }) {
     if (!form.gsm || Number(form.gsm) <= 0) errs.gsm = 'GSM weight is required';
     if (!form.stock || Number(form.stock) < 0) errs.stock = 'Stock quantity is required';
     if (form.sizes.length === 0) errs.sizes = 'Select at least one size';
-    if (!form.images[0]?.trim()) errs.images = 'At least one image URL is required';
+    
+    const validImages = (form.images || []).filter((img) => img && img.trim());
+    if (validImages.length === 0) errs.images = 'At least one product image is required (upload photo or enter URL)';
+    
     if (form.colors.length === 0 || !form.colors[0]?.name?.trim())
       errs.colors = 'At least one color variant is required';
     setErrors(errs);
@@ -176,9 +295,12 @@ export default function AdminProductForm({ editProduct, onDone, onCancel }) {
   };
 
   // ─── Submit ────────────────────────────────────
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
+
+    setIsSubmitting(true);
+    setErrorMsg('');
 
     const productData = {
       ...form,
@@ -197,18 +319,33 @@ export default function AdminProductForm({ editProduct, onDone, onCancel }) {
       details: form.details.filter((d) => d.trim()),
     };
 
-    if (isEdit) {
-      updateProduct(editProduct.id, productData);
-      setSuccessMsg('Product updated successfully!');
-    } else {
-      addProduct(productData);
-      setSuccessMsg('Product added successfully!');
-    }
+    try {
+      if (isEdit) {
+        const { error } = await updateProduct(editProduct.id, productData);
+        if (error) {
+          setErrorMsg(`Updated locally, but Supabase notice: ${error.message}`);
+        } else {
+          setSuccessMsg('Product updated successfully in Supabase & Store!');
+        }
+      } else {
+        const { error } = await addProduct(productData);
+        if (error) {
+          setErrorMsg(`Saved locally, but Supabase notice: ${error.message}`);
+        } else {
+          setSuccessMsg('Product added successfully to Supabase & Store!');
+        }
+      }
 
-    setTimeout(() => {
-      setSuccessMsg('');
-      onDone();
-    }, 1500);
+      setTimeout(() => {
+        setSuccessMsg('');
+        setIsSubmitting(false);
+        onDone();
+      }, 1200);
+    } catch (err) {
+      console.error('Submit error:', err);
+      setErrorMsg('Failed to save product: ' + err.message);
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -240,11 +377,17 @@ export default function AdminProductForm({ editProduct, onDone, onCancel }) {
         </div>
       </div>
 
-      {/* Success */}
+      {/* Success / Error Messages */}
       {successMsg && (
         <div className="admin-success">
           <CheckCircle size={16} />
           {successMsg}
+        </div>
+      )}
+      {errorMsg && (
+        <div className="admin-error" style={{ marginBottom: '1.5rem' }}>
+          <AlertCircle size={16} />
+          {errorMsg}
         </div>
       )}
 
@@ -464,51 +607,214 @@ export default function AdminProductForm({ editProduct, onDone, onCancel }) {
 
         {/* ── Images ─────────────────────────────── */}
         <div className="admin-form-section">
-          <div className="admin-form-section-title">
-            <Image size={16} />
-            Product Images
+          <div className="admin-form-section-title" style={{ justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <ImageIcon size={16} />
+              <span>Product Photos & Media</span>
+            </div>
+            {form.images && form.images.length > 0 && (
+              <span style={{ fontSize: '0.75rem', color: '#818cf8', fontWeight: 600 }}>
+                {form.images.length} photo{form.images.length > 1 ? 's' : ''} uploaded
+              </span>
+            )}
           </div>
+
+          {/* Supabase Storage Notice Info */}
+          <div className="admin-storage-info-box">
+            <Info size={16} style={{ flexShrink: 0, marginTop: '2px', color: '#818cf8' }} />
+            <div>
+              <strong>Storage Location:</strong> Photos uploaded directly are securely stored in your <strong>Supabase Storage</strong> bucket (<code style={{ color: '#a5b4fc', background: 'rgba(255,255,255,0.06)', padding: '2px 5px', borderRadius: '4px' }}>product-images</code>) and their public CDN URLs are saved to the database.
+            </div>
+          </div>
+
+          {storageNotice && (
+            <div className="admin-storage-info-box" style={{ background: 'rgba(245, 158, 11, 0.08)', borderColor: 'rgba(245, 158, 11, 0.3)', color: '#fbbf24', marginTop: '0.5rem' }}>
+              <Info size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
+              <span>{storageNotice}</span>
+            </div>
+          )}
+
           {errors.images && (
-            <span style={{ color: '#fca5a5', fontSize: '0.75rem', display: 'block', marginBottom: '0.5rem' }}>
+            <span style={{ color: '#fca5a5', fontSize: '0.75rem', display: 'block', marginTop: '0.5rem', marginBottom: '0.5rem' }}>
               {errors.images}
             </span>
           )}
-          {form.images.map((img, i) => (
-            <div className="admin-field" key={i}>
-              <label className="admin-label">
-                Image {i + 1} URL {i === 0 ? '*' : '(optional)'}
-              </label>
-              <input
-                className={`admin-input ${i === 0 && errors.images ? 'admin-input-error' : ''}`}
-                type="url"
-                placeholder="https://images.unsplash.com/..."
-                value={img}
-                onChange={(e) => setImage(i, e.target.value)}
-              />
+
+          {/* Hidden File Input */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            style={{ display: 'none' }}
+            onChange={(e) => {
+              handleFilesUpload(e.target.files);
+              e.target.value = '';
+            }}
+          />
+
+          {/* Drag and Drop Upload Zone */}
+          <div
+            className={`admin-upload-dropzone ${dragOver ? 'dragging' : ''}`}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
+            style={{ marginTop: '0.75rem' }}
+          >
+            {isUploading && (
+              <div className="admin-image-uploading-overlay">
+                <Loader2 size={24} className="animate-spin" />
+                <span>Uploading photos to Supabase Storage...</span>
+              </div>
+            )}
+            <div className="admin-upload-icon-circle">
+              <UploadCloud size={24} />
             </div>
-          ))}
-          <div className="admin-image-previews">
-            {form.images
-              .filter((img) => img.trim())
-              .map((img, i) => (
-                <img
-                  key={i}
-                  className="admin-image-preview"
-                  src={img}
-                  alt={`Preview ${i + 1}`}
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                  }}
-                />
-              ))}
+            <div className="admin-upload-title">
+              Click to browse or drag & drop product photos
+            </div>
+            <div className="admin-upload-subtitle">
+              PNG, JPG, WEBP supported • Upload multiple photos at once
+            </div>
           </div>
+
+          {/* Uploaded Images Grid */}
+          {form.images && form.images.length > 0 && (
+            <div className="admin-image-grid">
+              {form.images.map((img, i) => (
+                <div
+                  key={i}
+                  className={`admin-image-card ${i === 0 ? 'is-cover' : ''}`}
+                >
+                  <div className="admin-image-thumb-wrap">
+                    <img
+                      src={img}
+                      alt={`Product photo ${i + 1}`}
+                      onError={(e) => {
+                        e.target.style.opacity = '0.3';
+                      }}
+                    />
+                    {i === 0 && (
+                      <span className="admin-image-cover-badge">
+                        Cover Photo
+                      </span>
+                    )}
+                  </div>
+                  <div className="admin-image-card-actions">
+                    <div style={{ display: 'flex', gap: '2px' }}>
+                      {i > 0 && (
+                        <button
+                          type="button"
+                          className="admin-img-action-btn"
+                          title="Move left / Set as Cover"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (i === 1) makeCover(i);
+                            else moveImage(i, -1);
+                          }}
+                        >
+                          <MoveLeft size={13} />
+                        </button>
+                      )}
+                      {i < form.images.length - 1 && (
+                        <button
+                          type="button"
+                          className="admin-img-action-btn"
+                          title="Move right"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            moveImage(i, 1);
+                          }}
+                        >
+                          <MoveRight size={13} />
+                        </button>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      className="admin-img-action-btn danger"
+                      title="Remove image"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeImageAt(i);
+                      }}
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Additional Actions (Upload More & Manual URL) */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginTop: '1rem', alignItems: 'center' }}>
+            <button
+              type="button"
+              className="admin-btn-secondary"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                fontSize: '0.8rem',
+              }}
+            >
+              <Upload size={14} />
+              Upload Photos
+            </button>
+
+            <button
+              type="button"
+              className="admin-btn-secondary"
+              onClick={() => setShowUrlInput(!showUrlInput)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                fontSize: '0.8rem',
+              }}
+            >
+              <LinkIcon size={14} />
+              {showUrlInput ? 'Hide URL Input' : 'Add via Image URL'}
+            </button>
+          </div>
+
+          {/* Manual URL Input Box */}
+          {showUrlInput && (
+            <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <input
+                className="admin-input"
+                type="url"
+                placeholder="Paste direct image URL (https://...)"
+                value={customUrlInput}
+                onChange={(e) => setCustomUrlInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addUrlImage();
+                  }
+                }}
+              />
+              <button
+                type="button"
+                className="admin-btn-primary"
+                onClick={addUrlImage}
+                style={{ padding: '0.6rem 1.2rem', whiteSpace: 'nowrap' }}
+              >
+                Add URL
+              </button>
+            </div>
+          )}
         </div>
 
         {/* ── Colors ─────────────────────────────── */}
         <div className="admin-form-section">
           <div className="admin-form-section-title">
             <Palette size={16} />
-            Color Variants
+            Color Variants & Swatches
           </div>
           {errors.colors && (
             <span style={{ color: '#fca5a5', fontSize: '0.75rem', display: 'block', marginBottom: '0.5rem' }}>
@@ -524,7 +830,7 @@ export default function AdminProductForm({ editProduct, onDone, onCancel }) {
                   onChange={(e) => setColor(i, 'hex', e.target.value)}
                 />
               </div>
-              <div className="admin-color-fields">
+              <div className="admin-color-fields" style={{ display: 'grid', gridTemplateColumns: '1.2fr 2fr auto', gap: '0.5rem', alignItems: 'center' }}>
                 <input
                   className="admin-input"
                   type="text"
@@ -532,14 +838,53 @@ export default function AdminProductForm({ editProduct, onDone, onCancel }) {
                   value={color.name}
                   onChange={(e) => setColor(i, 'name', e.target.value)}
                 />
-                <input
-                  className="admin-input"
-                  type="url"
-                  placeholder="Color-specific image URL (optional)"
-                  value={color.image}
-                  onChange={(e) => setColor(i, 'image', e.target.value)}
-                />
+                
+                {/* Color Image Row */}
+                <div className="admin-color-img-row">
+                  {color.image && (
+                    <img
+                      src={color.image}
+                      alt={color.name || 'Color variant'}
+                      className="admin-color-img-preview"
+                      onError={(e) => { e.target.style.display = 'none'; }}
+                    />
+                  )}
+                  <input
+                    className="admin-input"
+                    type="text"
+                    placeholder="Photo URL or upload below"
+                    value={color.image}
+                    onChange={(e) => setColor(i, 'image', e.target.value)}
+                    style={{ fontSize: '0.8rem' }}
+                  />
+                  {/* Hidden file input for this color */}
+                  <input
+                    ref={(el) => (colorFileInputRefs.current[i] = el)}
+                    type="file"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={(e) => {
+                      handleColorUpload(e.target.files[0], i);
+                      e.target.value = '';
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="admin-upload-btn-mini"
+                    disabled={uploadingColorIdx === i}
+                    onClick={() => colorFileInputRefs.current[i]?.click()}
+                    title="Upload photo for this color variant"
+                  >
+                    {uploadingColorIdx === i ? (
+                      <Loader2 size={13} className="animate-spin" />
+                    ) : (
+                      <Upload size={13} />
+                    )}
+                    Upload
+                  </button>
+                </div>
               </div>
+
               {form.colors.length > 1 && (
                 <button
                   type="button"
@@ -685,13 +1030,28 @@ export default function AdminProductForm({ editProduct, onDone, onCancel }) {
         </div>
 
         {/* ── Submit ─────────────────────────────── */}
-        <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
-          <button type="submit" className="admin-btn-primary" style={{ maxWidth: '280px' }}>
-            {isEdit ? 'Update Product' : 'Add Product'}
+        <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', alignItems: 'center' }}>
+          <button
+            type="submit"
+            className="admin-btn-primary"
+            disabled={isSubmitting}
+            style={{ maxWidth: '280px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                Saving to Supabase...
+              </>
+            ) : isEdit ? (
+              'Update Product'
+            ) : (
+              'Add Product'
+            )}
           </button>
           <button
             type="button"
             className="admin-btn-secondary"
+            disabled={isSubmitting}
             onClick={onCancel}
           >
             Cancel
