@@ -48,7 +48,7 @@ export default function FilterBar({
       </div>
 
       {/* Secondary Filter & Sort Controls Bar */}
-      <div className="p-3 sm:p-4 rounded-2xl bg-[#10121A] border border-slate-800/80 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+      <div className="p-3 sm:p-4 rounded-2xl bg-[#10121A] border border-slate-800/80 flex flex-wrap items-center justify-between gap-3 text-xs font-mono overflow-hidden">
         
         {/* Left: Size Selector Pills & GSM filter */}
         <div className="flex flex-wrap items-center gap-3">

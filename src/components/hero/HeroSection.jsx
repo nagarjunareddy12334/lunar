@@ -8,7 +8,7 @@ export default function HeroSection({ onExplore, onSelectCategory, onOpenFabricG
   return (
     <section className="relative min-h-[88vh] flex items-center justify-center overflow-hidden border-b border-slate-800/80 bg-[#07080C]">
       {/* Background Ambience & Editorial Imagery */}
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 z-0 overflow-hidden">
         <img
           src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=2000&q=85"
           alt="LUNAR Streetwear T-Shirts"

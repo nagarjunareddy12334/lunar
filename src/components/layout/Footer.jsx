@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Moon, Send, ShieldCheck, Globe, ArrowUp, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Moon, Send, ShieldCheck, Globe, ArrowUp, Sparkles, CheckCircle2, Lock } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 
 export default function Footer({ onNavigate, onSelectCategory, onOpenSizeGuide }) {
@@ -45,7 +46,7 @@ export default function Footer({ onNavigate, onSelectCategory, onOpenSizeGuide }
             <p className="text-slate-400 font-light leading-relaxed max-w-sm">
               Sculptural streetwear t-shirts engineered with 280 to 360 GSM combed cotton, drop-shoulder silhouettes, and reinforced zero-sag collars. Crafted in limited runs.
             </p>
-            <div className="flex items-center gap-4 text-[11px] font-mono text-slate-500 pt-2">
+            <div className="flex items-center gap-4 text-[11px] font-mono text-slate-500 pt-2 flex-wrap">
               <span>WEIGHT: 280–360 GSM</span>
               <span>•</span>
               <span>100% COMBED COTTON</span>
@@ -245,10 +246,17 @@ export default function Footer({ onNavigate, onSelectCategory, onOpenSizeGuide }
             © {new Date().getFullYear()} LUNAR TEES APPAREL INC. ALL RIGHTS RESERVED.
           </div>
 
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4 sm:gap-6 flex-wrap justify-center sm:justify-end">
             <span className="hover:text-slate-300 cursor-pointer">PRIVACY</span>
             <span className="hover:text-slate-300 cursor-pointer">TERMS</span>
             <span className="hover:text-slate-300 cursor-pointer">LIFETIME COLLAR GUARANTEE</span>
+            <Link
+              to="/admin"
+              className="hover:text-[#C5A880] transition-colors flex items-center gap-1 text-slate-400"
+            >
+              <Lock className="w-3 h-3" />
+              <span>ADMIN PORTAL</span>
+            </Link>
             <button
               onClick={scrollToTop}
               className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer ml-2"

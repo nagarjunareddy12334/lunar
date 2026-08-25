@@ -24,6 +24,11 @@
 }
 
 /* Custom Base Styles */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
 html {
   font-family: var(--font-body);
   background-color: var(--color-lunar-900);

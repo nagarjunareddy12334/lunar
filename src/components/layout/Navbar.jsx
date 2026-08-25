@@ -237,7 +237,7 @@ export default function Navbar({ onOpenSearch, onNavigate, onSelectCategory, onG
             </button>
           </div>
 
-          <div className="mt-8 pt-6 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400 font-mono">
+          <div className="mt-8 pt-6 border-t border-slate-800 flex flex-wrap justify-between items-center gap-2 text-xs text-slate-400 font-mono">
             <span>SHIPPING: WORLDWIDE OVER $75</span>
             <span className="text-[#C5A880]">CODE: LUNARTEE15</span>
           </div>

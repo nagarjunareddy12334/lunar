@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastProvider } from './context/ToastContext';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
+import { AdminAuthProvider } from './context/AdminAuthContext';
 
 import Navbar from './components/layout/Navbar';
 import HeroSection from './components/hero/HeroSection';
@@ -22,7 +24,10 @@ import CheckoutModal from './components/cart/CheckoutModal';
 import WishlistDrawer from './components/wishlist/WishlistDrawer';
 import SearchModal from './components/ui/SearchModal';
 
-function MainApp() {
+import AdminLogin from './components/admin/AdminLogin';
+import AdminDashboard from './components/admin/AdminDashboard';
+
+function Storefront() {
   // Modal & Drawer State
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
@@ -46,7 +51,7 @@ function MainApp() {
   };
 
   return (
-    <div className="min-h-screen bg-[#090A0F] text-slate-100 flex flex-col font-sans selection:bg-[#C5A880]/30 selection:text-white relative">
+    <div className="min-h-screen bg-[#090A0F] text-slate-100 flex flex-col font-sans selection:bg-[#C5A880]/30 selection:text-white relative overflow-x-hidden">
       {/* Avant-Garde Interactive Cursor Follower */}
       <CustomCursor />
 
@@ -81,8 +86,6 @@ function MainApp() {
 
         {/* Infinite Runway Typography Ticker (Reverse Flow) */}
         <MarqueeTicker reverse speed={40} />
-
-
 
         {/* 5. Brand Story & Craftsmanship */}
         <BrandStory />
@@ -133,12 +136,27 @@ function MainApp() {
 
 export default function App() {
   return (
-    <ToastProvider>
-      <CartProvider>
-        <WishlistProvider>
-          <MainApp />
-        </WishlistProvider>
-      </CartProvider>
-    </ToastProvider>
+    <BrowserRouter>
+      <ToastProvider>
+        <CartProvider>
+          <WishlistProvider>
+            <AdminAuthProvider>
+              <Routes>
+                {/* Public Storefront */}
+                <Route path="/" element={<Storefront />} />
+
+                {/* Admin Portal */}
+                <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/admin/dashboard" element={<AdminDashboard />} />
+
+                {/* Catch-all redirect to Home */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </AdminAuthProvider>
+          </WishlistProvider>
+        </CartProvider>
+      </ToastProvider>
+    </BrowserRouter>
   );
 }

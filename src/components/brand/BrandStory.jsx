@@ -23,7 +23,7 @@ export default function BrandStory() {
   return (
     <section id="craftsmanship" className="py-24 bg-[#090A0F] border-b border-slate-800/80 relative overflow-hidden">
       {/* Background Ambience */}
-      <div className="absolute top-1/2 left-0 w-96 h-96 bg-slate-800/10 blur-[150px] pointer-events-none" />
+      <div className="absolute top-1/2 left-0 w-96 max-w-full h-96 bg-slate-800/10 blur-[150px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section Header */}
