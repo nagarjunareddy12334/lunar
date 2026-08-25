@@ -75,7 +75,7 @@ export default function TiltCard({
         {/* Specular Light Reflection Glare Overlay */}
         {glare && (
           <div
-            className="pointer-events-none absolute inset-0 rounded-[inherit] overflow-hidden transition-opacity duration-300 z-30"
+            className="pointer-events-none absolute inset-0 rounded-[inherit] overflow-hidden transition-opacity duration-300"
             style={{
               opacity: isHovered ? tilt.glareOpacity : 0,
               background: `radial-gradient(circle at ${tilt.glareX}% ${tilt.glareY}%, rgba(255, 255, 255, 0.4) 0%, rgba(197, 168, 128, 0.15) 30%, transparent 70%)`,

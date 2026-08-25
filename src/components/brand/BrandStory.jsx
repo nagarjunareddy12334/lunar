@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { Shield, Sparkles, Leaf, Truck, Compass, CheckCircle2, Crosshair } from 'lucide-react';
+import { Shield, Sparkles, Leaf, Truck, Compass, CheckCircle2 } from 'lucide-react';
 import { BRAND_VALUES } from '../../data/products';
 import TiltCard from '../ui/TiltCard';
 import { useSoundFX } from '../../hooks/useSoundFX';
 
 export default function BrandStory() {
   const { playClick, playHover } = useSoundFX();
-  const [activeHotspot, setActiveHotspot] = useState(null);
+  const [isColorized, setIsColorized] = useState(false);
 
   const iconMap = {
     Shield: Shield,
@@ -15,22 +15,10 @@ export default function BrandStory() {
     Truck: Truck,
   };
 
-  const HOTSPOTS = [
-    {
-      id: 'titanium',
-      x: 35,
-      y: 40,
-      title: 'Titanium Micro-Weave',
-      detail: 'Aerospace Grade 5 thread interwoven with ripstop filament for extreme tear resistance.',
-    },
-    {
-      id: 'fidlock',
-      x: 65,
-      y: 60,
-      title: 'Magnetic Latches',
-      detail: 'Patented German fidlock system engineered for instant tactile one-handed release.',
-    },
-  ];
+  const handleImageClick = () => {
+    playClick();
+    setIsColorized((prev) => !prev);
+  };
 
   return (
     <section id="craftsmanship" className="py-24 bg-[#090A0F] border-b border-slate-800/80 relative overflow-hidden">
@@ -54,51 +42,70 @@ export default function BrandStory() {
 
         {/* 2-Column Showcase */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center mb-20">
-          {/* Left Imagery with Interactive Hotspots */}
+          {/* Left Imagery with Click-to-Colorize */}
           <div className="lg:col-span-6 relative">
             <TiltCard maxTilt={4} scale={1.01}>
-              <div className="relative aspect-[4/5] rounded-3xl overflow-hidden glass-panel border border-slate-700/80 shadow-2xl group">
+              <div
+                className="relative aspect-[4/5] rounded-3xl overflow-hidden glass-panel border border-slate-700/80 shadow-2xl group cursor-pointer"
+                onClick={handleImageClick}
+                onMouseEnter={playHover}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleImageClick(); }}
+                aria-label={isColorized ? 'Click to revert to black and white' : 'Click to reveal full color'}
+              >
                 <img
                   src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1200&q=85"
                   alt="LUNAR Material Craftsmanship"
-                  className="w-full h-full object-cover grayscale contrast-125 group-hover:scale-105 transition-transform duration-700"
+                  className="w-full h-full object-cover transition-all duration-1000 ease-out"
+                  style={{
+                    filter: isColorized
+                      ? 'grayscale(0%) contrast(100%) saturate(120%)'
+                      : 'grayscale(100%) contrast(125%) saturate(0%)',
+                    transform: isColorized ? 'scale(1.05)' : 'scale(1)',
+                  }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
 
-                {/* Interactive Hotspot Beacons */}
-                {HOTSPOTS.map((spot) => (
-                  <div
-                    key={spot.id}
-                    style={{ top: `${spot.y}%`, left: `${spot.x}%` }}
-                    className="absolute -translate-x-1/2 -translate-y-1/2 z-20"
-                  >
-                    <button
-                      onClick={() => {
-                        playClick(1500);
-                        setActiveHotspot(activeHotspot === spot.id ? null : spot.id);
-                      }}
-                      onMouseEnter={playHover}
-                      className="relative w-8 h-8 rounded-full flex items-center justify-center bg-white/90 text-black shadow-lg cursor-pointer hover:scale-110 transition-transform"
-                      aria-label={spot.title}
-                    >
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#C5A880] opacity-75"></span>
-                      <Crosshair className="w-4 h-4 text-black relative z-10" />
-                    </button>
+                {/* Color reveal shimmer overlay */}
+                <div
+                  className="absolute inset-0 pointer-events-none transition-opacity duration-1000"
+                  style={{
+                    opacity: isColorized ? 0 : 1,
+                    background: 'linear-gradient(135deg, rgba(197,168,128,0.08) 0%, transparent 50%, rgba(197,168,128,0.05) 100%)',
+                  }}
+                />
 
-                    {/* Popover Detail */}
-                    {activeHotspot === spot.id && (
-                      <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 w-56 p-3.5 rounded-xl glass-panel bg-black/90 border border-[#C5A880]/40 shadow-2xl z-30 animate-fadeIn text-left">
-                        <span className="text-[9px] font-mono text-[#C5A880] uppercase tracking-widest block mb-1">
-                          SPECIFICATION NODE
-                        </span>
-                        <h5 className="text-xs font-bold text-white uppercase mb-1 font-mono">{spot.title}</h5>
-                        <p className="text-[11px] text-slate-300 font-light leading-relaxed">{spot.detail}</p>
-                      </div>
-                    )}
+                {/* Click hint overlay */}
+                <div
+                  className="absolute inset-0 flex items-center justify-center transition-all duration-700 pointer-events-none"
+                  style={{ opacity: isColorized ? 0 : 1 }}
+                >
+                  <div className="px-5 py-2.5 rounded-full bg-black/60 backdrop-blur-md border border-white/20 flex items-center gap-2.5 shadow-2xl">
+                    <span className="w-2 h-2 rounded-full bg-[#C5A880] animate-pulse" />
+                    <span className="text-[11px] font-mono text-white uppercase tracking-widest">
+                      Click to reveal in color
+                    </span>
                   </div>
-                ))}
+                </div>
 
-                <div className="absolute bottom-6 left-6 right-6 p-6 rounded-2xl glass-panel border border-white/10">
+                {/* Colorized state badge */}
+                <div
+                  className="absolute top-4 right-4 z-20 transition-all duration-700 pointer-events-none"
+                  style={{
+                    opacity: isColorized ? 1 : 0,
+                    transform: isColorized ? 'translateY(0) scale(1)' : 'translateY(-8px) scale(0.9)',
+                  }}
+                >
+                  <div className="px-3 py-1.5 rounded-lg bg-[#C5A880]/20 backdrop-blur-md border border-[#C5A880]/40 flex items-center gap-2">
+                    <Sparkles className="w-3.5 h-3.5 text-[#C5A880]" />
+                    <span className="text-[10px] font-mono text-[#C5A880] uppercase tracking-widest font-bold">
+                      True Color
+                    </span>
+                  </div>
+                </div>
+
+                <div className="absolute bottom-6 left-6 right-6 p-6 rounded-2xl glass-panel border border-white/10 pointer-events-none">
                   <span className="text-[10px] font-mono text-[#C5A880] uppercase tracking-widest block mb-1">
                     PATENTED WEAVE SPECIFICATION
                   </span>
@@ -183,3 +190,4 @@ export default function BrandStory() {
     </section>
   );
 }
+

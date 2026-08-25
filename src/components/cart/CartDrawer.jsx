@@ -214,10 +214,6 @@ export default function CartDrawer({ onOpenCheckout }) {
                   <span>Estimated Shipping</span>
                   <span className="text-slate-200">{shipping === 0 ? 'FREE' : formatPrice(shipping)}</span>
                 </div>
-                <div className="flex justify-between text-sm font-bold text-white pt-2 border-t border-slate-800">
-                  <span>Total</span>
-                  <span className="text-base font-mono">{formatPrice(grandTotal)}</span>
-                </div>
               </div>
 
               {/* Checkout CTA */}

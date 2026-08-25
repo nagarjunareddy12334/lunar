@@ -23,11 +23,7 @@ export default function AnnouncementBar() {
   return (
     <div className="bg-[#050608] border-b border-slate-800/80 text-slate-300 text-xs py-2 px-4 relative overflow-hidden select-none z-40">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
-        {/* Left Indicator */}
-        <div className="hidden md:flex items-center gap-2 text-slate-400 font-mono text-[11px]">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span>T-SHIRT STUDIO LIVE</span>
-        </div>
+
 
         {/* Center Rotating Message */}
         <div className="flex-1 flex items-center justify-center gap-2 text-center font-medium tracking-wider text-[11px] sm:text-xs">

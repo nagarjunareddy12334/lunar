@@ -3,13 +3,12 @@ import { ToastProvider } from './context/ToastContext';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
 
-import AnnouncementBar from './components/layout/AnnouncementBar';
 import Navbar from './components/layout/Navbar';
 import HeroSection from './components/hero/HeroSection';
 import MarqueeTicker from './components/ui/MarqueeTicker';
 import DropCountdown from './components/hero/DropCountdown';
 import ProductCatalog from './components/products/ProductCatalog';
-import LookbookBuilder from './components/lookbook/LookbookBuilder';
+
 import BrandStory from './components/brand/BrandStory';
 import CommunityOrbit from './components/brand/CommunityOrbit';
 import Footer from './components/layout/Footer';
@@ -54,9 +53,6 @@ function MainApp() {
       {/* Dynamic Stardust & Constellation Celestial Background */}
       <CelestialCanvas />
 
-      {/* Top Banner */}
-      <AnnouncementBar />
-
       {/* Navigation */}
       <Navbar
         onOpenSearch={() => setIsSearchOpen(true)}
@@ -86,8 +82,7 @@ function MainApp() {
         {/* Infinite Runway Typography Ticker (Reverse Flow) */}
         <MarqueeTicker reverse speed={40} />
 
-        {/* 4. Lookbook Studio */}
-        <LookbookBuilder />
+
 
         {/* 5. Brand Story & Craftsmanship */}
         <BrandStory />
