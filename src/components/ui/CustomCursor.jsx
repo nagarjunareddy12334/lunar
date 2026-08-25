@@ -54,8 +54,18 @@ export default function CustomCursor() {
       }
     };
 
-    const handleMouseDown = () => setCursorMode((prev) => (prev === 'default' ? 'active' : prev));
-    const handleMouseUp = () => setCursorMode('default');
+    // Use direct DOM manipulation for mousedown/mouseup to avoid React re-renders
+    // that interfere with click event propagation on interactive elements
+    const handleMouseDown = () => {
+      if (ringRef.current) {
+        ringRef.current.classList.add('scale-90');
+      }
+    };
+    const handleMouseUp = () => {
+      if (ringRef.current) {
+        ringRef.current.classList.remove('scale-90');
+      }
+    };
     const handleMouseLeave = () => setIsVisible(false);
     const handleMouseEnter = () => setIsVisible(true);
 
@@ -118,8 +128,6 @@ export default function CustomCursor() {
             ? 'w-24 h-24 bg-slate-900/60 border border-slate-400/80 shadow-[0_0_25px_rgba(255,255,255,0.2)]'
             : cursorMode === 'hover'
             ? 'w-10 h-10 border border-[#C5A880]/60 bg-[#C5A880]/10 scale-110'
-            : cursorMode === 'active'
-            ? 'w-7 h-7 border border-white/80 bg-white/20 scale-90'
             : 'w-8 h-8 border border-white/25 bg-white/[0.02]'
         }`}
         style={{ willChange: 'transform' }}

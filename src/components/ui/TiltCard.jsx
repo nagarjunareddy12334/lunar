@@ -1,8 +1,9 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useCallback } from 'react';
 
 /**
  * 3D Gyroscopic Tilt Card with Specular Light Reflection Sheen
- * Adds depth, perspective, and dynamic lighting response to product cards and editorial panels.
+ * Uses direct DOM manipulation (refs) instead of React state to avoid
+ * re-renders on every mouse move that can swallow click events in children.
  */
 export default function TiltCard({
   children,
@@ -13,41 +14,41 @@ export default function TiltCard({
   ...props
 }) {
   const cardRef = useRef(null);
-  const [tilt, setTilt] = useState({ x: 0, y: 0, glareX: 50, glareY: 50, glareOpacity: 0 });
-  const [isHovered, setIsHovered] = useState(false);
+  const innerRef = useRef(null);
+  const glareRef = useRef(null);
 
-  const handleMouseMove = (e) => {
-    if (!cardRef.current) return;
+  const handleMouseMove = useCallback((e) => {
+    if (!cardRef.current || !innerRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
-    const width = rect.width;
-    const height = rect.height;
 
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-
-    const xPct = mouseX / width;
-    const yPct = mouseY / height;
+    const xPct = (e.clientX - rect.left) / rect.width;
+    const yPct = (e.clientY - rect.top) / rect.height;
 
     const rotateX = (0.5 - yPct) * maxTilt * 2;
     const rotateY = (xPct - 0.5) * maxTilt * 2;
 
-    setTilt({
-      x: rotateX,
-      y: rotateY,
-      glareX: xPct * 100,
-      glareY: yPct * 100,
-      glareOpacity: 0.25,
-    });
-  };
+    innerRef.current.style.transform =
+      `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(${scale}, ${scale}, ${scale})`;
 
-  const handleMouseEnter = () => {
-    setIsHovered(true);
-  };
+    if (glareRef.current) {
+      glareRef.current.style.opacity = '0.25';
+      glareRef.current.style.background =
+        `radial-gradient(circle at ${xPct * 100}% ${yPct * 100}%, rgba(255, 255, 255, 0.4) 0%, rgba(197, 168, 128, 0.15) 30%, transparent 70%)`;
+    }
+  }, [maxTilt, scale]);
 
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-    setTilt({ x: 0, y: 0, glareX: 50, glareY: 50, glareOpacity: 0 });
-  };
+  const handleMouseEnter = useCallback(() => {
+    // nothing needed — transforms applied on move
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    if (innerRef.current) {
+      innerRef.current.style.transform = 'rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+    }
+    if (glareRef.current) {
+      glareRef.current.style.opacity = '0';
+    }
+  }, []);
 
   return (
     <div
@@ -62,11 +63,10 @@ export default function TiltCard({
       {...props}
     >
       <div
+        ref={innerRef}
         className="w-full h-full relative transition-all duration-300 ease-out"
         style={{
-          transform: isHovered
-            ? `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) scale3d(${scale}, ${scale}, ${scale})`
-            : 'rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)',
+          transform: 'rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)',
           willChange: 'transform',
         }}
       >
@@ -75,10 +75,10 @@ export default function TiltCard({
         {/* Specular Light Reflection Glare Overlay */}
         {glare && (
           <div
+            ref={glareRef}
             className="pointer-events-none absolute inset-0 rounded-[inherit] overflow-hidden transition-opacity duration-300"
             style={{
-              opacity: isHovered ? tilt.glareOpacity : 0,
-              background: `radial-gradient(circle at ${tilt.glareX}% ${tilt.glareY}%, rgba(255, 255, 255, 0.4) 0%, rgba(197, 168, 128, 0.15) 30%, transparent 70%)`,
+              opacity: 0,
               mixBlendMode: 'overlay',
             }}
           />
@@ -87,3 +87,4 @@ export default function TiltCard({
     </div>
   );
 }
+

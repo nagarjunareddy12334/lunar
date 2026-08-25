@@ -47,7 +47,10 @@ export default function BrandStory() {
             <TiltCard maxTilt={4} scale={1.01}>
               <div
                 className="relative aspect-[4/5] rounded-3xl overflow-hidden glass-panel border border-slate-700/80 shadow-2xl group cursor-pointer"
-                onClick={handleImageClick}
+                onPointerDown={(e) => {
+                  e.stopPropagation();
+                  handleImageClick();
+                }}
                 onMouseEnter={playHover}
                 role="button"
                 tabIndex={0}
