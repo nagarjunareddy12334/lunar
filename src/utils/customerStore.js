@@ -409,18 +409,21 @@ export async function sendPasswordResetOtp(identifier) {
 
   try {
     if (isEmail) {
-      // 2. Trigger Supabase native password recovery email / OTP
-      let { data, error } = await supabase.auth.resetPasswordForEmail(cleanEmail);
+      // 2. Trigger Supabase native email OTP / recovery
+      // signInWithOtp sends the 6-digit OTP code directly to user's email via custom SMTP
+      const { data: otpData, error: otpError } = await supabase.auth.signInWithOtp({
+        email: cleanEmail,
+        options: {
+          shouldCreateUser: true,
+        },
+      });
 
-      if (error) {
-        // Fallback to signInWithOtp if resetPasswordForEmail hits email config constraint
-        const { data: otpData, error: otpError } = await supabase.auth.signInWithOtp({
-          email: cleanEmail,
-          options: { shouldCreateUser: false },
-        });
-
-        if (otpError) {
-          console.warn('Supabase email OTP error:', otpError.message);
+      // Also call resetPasswordForEmail as secondary dispatch
+      if (otpError) {
+        console.warn('Supabase signInWithOtp notice:', otpError.message);
+        const { error: resetErr } = await supabase.auth.resetPasswordForEmail(cleanEmail);
+        if (resetErr) {
+          console.warn('Supabase resetPasswordForEmail notice:', resetErr.message);
         }
       }
 
@@ -433,6 +436,7 @@ export async function sendPasswordResetOtp(identifier) {
         message: `A 6-digit verification code has been dispatched to ${maskIdentifier(cleanEmail)}.`,
       };
     } else {
+
       // Mobile Phone SMS OTP
       const formattedPhone = formatPhoneE164(cleanId);
       const { data, error } = await supabase.auth.signInWithOtp({
