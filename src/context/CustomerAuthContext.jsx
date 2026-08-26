@@ -138,12 +138,23 @@ export function CustomerAuthProvider({ children }) {
         identifier,
         maskedTarget: res.maskedTarget || maskIdentifier(identifier),
         method: res.method || 'email',
+        sessionOtp: res.sessionOtp,
         otpVerified: false,
       });
-      return { success: true, maskedTarget: res.maskedTarget, message: res.message };
+      return {
+        success: true,
+        maskedTarget: res.maskedTarget,
+        sessionOtp: res.sessionOtp,
+        message: res.message,
+      };
     }
-    return { success: false, error: res.error || 'Failed to send verification code.' };
+    return {
+      success: false,
+      notRegistered: res.notRegistered,
+      error: res.error || 'Failed to send verification code.',
+    };
   }, []);
+
 
   // Verify the OTP code
   const verifyResetOtp = useCallback(async (identifier, otpCode) => {

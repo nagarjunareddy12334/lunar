@@ -85,6 +85,7 @@ export default function CustomerModal() {
   // Form states for Forgot Password / OTP Flow
   const [forgotIdentifier, setForgotIdentifier] = useState('');
   const [forgotError, setForgotError] = useState('');
+  const [isUnregistered, setIsUnregistered] = useState(false);
   const [otpCode, setOtpCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
@@ -148,7 +149,13 @@ export default function CustomerModal() {
         postalCode: customer.postalCode || '',
         country: customer.country || 'United States',
       });
-      if (authModalTab === 'login' || authModalTab === 'register' || authModalTab === 'forgot' || authModalTab === 'verify-otp') {
+      if (
+        authModalTab === 'login' ||
+        authModalTab === 'register' ||
+        authModalTab === 'forgot' ||
+        authModalTab === 'verify-otp' ||
+        authModalTab === 'set-password'
+      ) {
         setAuthModalTab('profile');
       }
     } else {
@@ -166,6 +173,7 @@ export default function CustomerModal() {
     setProfileSuccess('');
     setProfileError('');
     setForgotError('');
+    setIsUnregistered(false);
     setResetError('');
     setResetSuccess('');
     setResetDone(false);
@@ -191,10 +199,11 @@ export default function CustomerModal() {
     }
   };
 
-  // Step 1: Send OTP to email or phone
+  // Step 1: Send OTP to email or phone (checks registration)
   const handleSendOtp = async (e) => {
     e?.preventDefault();
     setForgotError('');
+    setIsUnregistered(false);
     const target = forgotIdentifier.trim();
     if (!target) {
       setForgotError('Please enter your registered email address or mobile number.');
@@ -211,6 +220,9 @@ export default function CustomerModal() {
       setResetDone(false);
       setAuthModalTab('verify-otp');
     } else {
+      if (res.notRegistered) {
+        setIsUnregistered(true);
+      }
       setForgotError(res.error || 'Failed to send OTP code. Please check your input.');
     }
   };
@@ -232,8 +244,8 @@ export default function CustomerModal() {
     }
   };
 
-  // Step 2: Verify OTP and Set New Password in Supabase Auth
-  const handleVerifyAndReset = async (e) => {
+  // Step 2: Verify OTP Only (Then transitions to Step 3: Change Password)
+  const handleVerifyOtpOnly = async (e) => {
     e.preventDefault();
     setResetError('');
     setResetSuccess('');
@@ -243,6 +255,27 @@ export default function CustomerModal() {
       setResetError('Please enter the full 6-digit OTP code received.');
       return;
     }
+
+    const target = resetState?.identifier || forgotIdentifier.trim();
+
+    // Verify OTP token with Supabase Auth / Session
+    const verifyRes = await verifyResetOtp(target, cleanOtp);
+    if (verifyRes.success) {
+      showToast('OTP verified successfully! Please set your new password.', 'success');
+      setResetError('');
+      setNewPassword('');
+      setConfirmNewPassword('');
+      setAuthModalTab('set-password');
+    } else {
+      setResetError(verifyRes.error || 'Invalid or expired OTP code.');
+    }
+  };
+
+  // Step 3: Update Password in Supabase Auth
+  const handleUpdatePasswordOnly = async (e) => {
+    e.preventDefault();
+    setResetError('');
+    setResetSuccess('');
 
     if (!newPassword || newPassword.length < 6) {
       setResetError('New password must be at least 6 characters long.');
@@ -256,16 +289,6 @@ export default function CustomerModal() {
 
     const target = resetState?.identifier || forgotIdentifier.trim();
 
-    // 1. If not already verified via email link, verify OTP token with Supabase Auth
-    if (!resetState?.otpVerified) {
-      const verifyRes = await verifyResetOtp(target, cleanOtp);
-      if (!verifyRes.success) {
-        setResetError(verifyRes.error || 'Invalid or expired OTP code.');
-        return;
-      }
-    }
-
-    // 2. Update actual password in Supabase Auth (auth.users)
     const updateRes = await updatePassword(newPassword, target);
     if (updateRes.success) {
       setResetDone(true);
@@ -275,6 +298,7 @@ export default function CustomerModal() {
       setResetError(updateRes.error || 'Failed to update password. Please try again.');
     }
   };
+
 
 
   const handleRegisterSubmit = async (e) => {
@@ -416,13 +440,17 @@ export default function CustomerModal() {
               >
                 Create Account
               </button>
-              {(authModalTab === 'forgot' || authModalTab === 'verify-otp') && (
+              {(authModalTab === 'forgot' || authModalTab === 'verify-otp' || authModalTab === 'set-password') && (
                 <button
                   type="button"
-                  className="flex-1 min-w-[130px] py-2.5 text-xs font-mono uppercase tracking-wider rounded-xl transition-all bg-[#C5A880]/20 text-[#C5A880] border border-[#C5A880]/40 font-bold flex items-center justify-center gap-1.5 cursor-default"
+                  className="flex-1 min-w-[140px] py-2.5 text-xs font-mono uppercase tracking-wider rounded-xl transition-all bg-[#C5A880]/20 text-[#C5A880] border border-[#C5A880]/40 font-bold flex items-center justify-center gap-1.5 cursor-default"
                 >
                   <KeyRound className="w-3.5 h-3.5" />
-                  <span>Reset OTP</span>
+                  <span>
+                    {authModalTab === 'forgot' && 'Reset (Step 1/3)'}
+                    {authModalTab === 'verify-otp' && 'Verify OTP (Step 2/3)'}
+                    {authModalTab === 'set-password' && 'New Password (Step 3/3)'}
+                  </span>
                 </button>
               )}
             </>
@@ -521,6 +549,7 @@ export default function CustomerModal() {
                     onClick={() => {
                       setForgotIdentifier(loginIdentifier || '');
                       setForgotError('');
+                      setIsUnregistered(false);
                       setAuthModalTab('forgot');
                     }}
                     className="text-[11px] font-mono text-[#C5A880] hover:text-[#d8be99] hover:underline cursor-pointer flex items-center gap-1 transition-colors"
@@ -592,9 +621,10 @@ export default function CustomerModal() {
                   onClick={() => {
                     setForgotIdentifier(loginIdentifier || '');
                     setForgotError('');
+                    setIsUnregistered(false);
                     setAuthModalTab('forgot');
                   }}
-                  className="text-slate-400 hover:text-[#C5A880] transition-colors text-[11px] font-mono flex items-center gap-1"
+                  className="text-slate-400 hover:text-[#C5A880] transition-colors text-[11px] font-mono flex items-center gap-1 cursor-pointer"
                 >
                   <Shield className="w-3 h-3 text-[#C5A880]" /> Reset via Supabase OTP
                 </button>
@@ -614,7 +644,7 @@ export default function CustomerModal() {
           )}
 
           {/* ========================================================================= */}
-          {/* 1.5. FORGOT PASSWORD — STEP 1: REQUEST OTP */}
+          {/* 1.5. FORGOT PASSWORD — STEP 1: REQUEST OTP (WITH UNREGISTERED DETECTION) */}
           {/* ========================================================================= */}
           {!isAuthenticated && authModalTab === 'forgot' && (
             <form onSubmit={handleSendOtp} className="space-y-4 animate-fadeIn">
@@ -622,15 +652,57 @@ export default function CustomerModal() {
                 <div className="flex items-center gap-2 text-[#C5A880] mb-1.5">
                   <KeyRound className="w-4 h-4" />
                   <h3 className="text-xs font-mono font-bold uppercase tracking-wider">
-                    Forgot Password / Reset with OTP
+                    Step 1: Enter Registered Email or Mobile
                   </h3>
                 </div>
                 <p className="text-[12px] text-slate-400 leading-relaxed">
-                  Enter your registered <strong className="text-slate-200">Email Address</strong> or <strong className="text-slate-200">Mobile Phone Number</strong>. Supabase Auth will generate and dispatch a secure one-time verification code (OTP).
+                  Enter your registered <strong className="text-slate-200">Email Address</strong> or <strong className="text-slate-200">Mobile Phone</strong>. We'll verify your registration and dispatch a secure one-time verification code (OTP).
                 </p>
               </div>
 
-              {forgotError && (
+              {/* Unregistered User Warning Popup Card */}
+              {isUnregistered && (
+                <div className="p-4 bg-rose-950/50 border border-rose-600/70 rounded-2xl text-rose-200 text-xs space-y-3 animate-fadeIn shadow-xl">
+                  <div className="flex items-start gap-2.5">
+                    <AlertCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="font-bold text-rose-100 uppercase tracking-wide text-xs">
+                        Email Address Not Registered
+                      </h4>
+                      <p className="text-[11.5px] text-rose-300/90 mt-1 leading-relaxed">
+                        We could not find an account associated with <strong className="text-white font-mono">{forgotIdentifier}</strong>. Please verify the spelling or create a new account.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (forgotIdentifier && forgotIdentifier.includes('@')) {
+                          setRegForm((prev) => ({ ...prev, email: forgotIdentifier }));
+                        }
+                        setAuthModalTab('register');
+                        setIsUnregistered(false);
+                      }}
+                      className="px-3.5 py-2 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl text-xs uppercase tracking-wider transition-colors cursor-pointer"
+                    >
+                      Create Account Now
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsUnregistered(false);
+                        setForgotIdentifier('');
+                      }}
+                      className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs transition-colors cursor-pointer"
+                    >
+                      Try Different Email
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {!isUnregistered && forgotError && (
                 <div className="p-3 bg-red-950/40 border border-red-800/60 rounded-xl text-red-300 text-xs flex items-center gap-2 animate-fadeIn">
                   <AlertCircle className="w-4 h-4 shrink-0" />
                   <span>{forgotError}</span>
@@ -639,7 +711,7 @@ export default function CustomerModal() {
 
               <div>
                 <label className="text-[11px] font-mono uppercase text-slate-300 block mb-1">
-                  Email Address or Mobile Number *
+                  Registered Email Address or Mobile Number *
                 </label>
                 <div className="relative">
                   <input
@@ -648,7 +720,10 @@ export default function CustomerModal() {
                     autoFocus
                     placeholder="e.g. alex.vanguard@lunar.com or +1 555 019 2834"
                     value={forgotIdentifier}
-                    onChange={(e) => setForgotIdentifier(e.target.value)}
+                    onChange={(e) => {
+                      setForgotIdentifier(e.target.value);
+                      setIsUnregistered(false);
+                    }}
                     className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-xs text-white outline-none focus:border-[#C5A880] transition-colors"
                   />
                   <div className="absolute right-3.5 top-3.5 flex items-center gap-1 text-slate-500">
@@ -668,7 +743,7 @@ export default function CustomerModal() {
                   {loading ? (
                     <>
                       <RefreshCw className="w-4 h-4 animate-spin" />
-                      <span>Sending OTP Code...</span>
+                      <span>Verifying & Sending OTP...</span>
                     </>
                   ) : (
                     <>
@@ -683,6 +758,7 @@ export default function CustomerModal() {
                   onClick={() => {
                     setAuthModalTab('login');
                     setForgotError('');
+                    setIsUnregistered(false);
                   }}
                   className="w-full py-2.5 text-xs font-mono text-slate-400 hover:text-white transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                 >
@@ -694,13 +770,132 @@ export default function CustomerModal() {
           )}
 
           {/* ========================================================================= */}
-          {/* 1.6. RESET PASSWORD — STEP 2: VERIFY OTP & UPDATE SUPABASE PASSWORD */}
+          {/* 1.6. STEP 2: ENTER & VERIFY OTP CODE */}
           {/* ========================================================================= */}
           {!isAuthenticated && authModalTab === 'verify-otp' && (
+            <form onSubmit={handleVerifyOtpOnly} className="space-y-4 animate-fadeIn">
+              {/* Status Banner */}
+              <div className="p-3.5 bg-slate-900/80 rounded-2xl border border-slate-800 flex items-start gap-3">
+                <div className="p-2 rounded-xl bg-[#C5A880]/10 text-[#C5A880] border border-[#C5A880]/20 shrink-0">
+                  <ShieldCheck className="w-4 h-4" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-mono text-[#C5A880] uppercase tracking-wider font-bold">
+                      Verification Code Dispatched
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setAuthModalTab('forgot')}
+                      className="text-[10px] font-mono text-slate-400 hover:text-white underline cursor-pointer"
+                    >
+                      Change Destination
+                    </button>
+                  </div>
+                  <p className="text-xs text-slate-300 mt-0.5">
+                    A 6-digit OTP was sent to <strong className="text-white font-mono">{resetState?.maskedTarget || forgotIdentifier || 'your email/phone'}</strong>
+                  </p>
+                </div>
+              </div>
+
+              {/* Convenience Auto-fill / Quick Test Banner if session OTP generated */}
+              {resetState?.sessionOtp && (
+                <div className="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 text-[11px] font-mono text-slate-400 flex items-center justify-between">
+                  <span className="flex items-center gap-1 text-slate-300">
+                    <Sparkles className="w-3.5 h-3.5 text-[#C5A880]" />
+                    Verification OTP: <strong className="text-[#C5A880] tracking-widest">{resetState.sessionOtp}</strong>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setOtpCode(resetState.sessionOtp)}
+                    className="px-2 py-0.5 bg-[#C5A880]/20 hover:bg-[#C5A880]/30 text-[#C5A880] rounded-lg text-[10px] font-bold border border-[#C5A880]/30 transition-colors cursor-pointer"
+                  >
+                    Auto-fill Code
+                  </button>
+                </div>
+              )}
+
+              {resetError && (
+                <div className="p-3 bg-red-950/40 border border-red-800/60 rounded-xl text-red-300 text-xs flex items-center gap-2 animate-fadeIn">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{resetError}</span>
+                </div>
+              )}
+
+              {/* 6-Digit OTP Input Block */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-[11px] font-mono uppercase text-slate-300 font-bold">
+                    Enter 6-Digit Verification Code (OTP) *
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleResendOtp}
+                    disabled={countdown > 0 || loading}
+                    className={`text-[10px] font-mono flex items-center gap-1 transition-colors ${
+                      countdown > 0 ? 'text-slate-500 cursor-not-allowed' : 'text-[#C5A880] hover:underline cursor-pointer'
+                    }`}
+                  >
+                    <RefreshCw className={`w-3 h-3 ${countdown > 0 ? '' : 'animate-pulse'}`} />
+                    {countdown > 0 ? `Resend code in ${countdown}s` : 'Resend OTP Code'}
+                  </button>
+                </div>
+                <input
+                  type="text"
+                  maxLength={8}
+                  required
+                  autoFocus
+                  placeholder="• • • • • •"
+                  value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value.replace(/[^0-9a-zA-Z]/g, '').slice(0, 6))}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-center text-xl font-mono tracking-[0.5em] text-white outline-none focus:border-[#C5A880] transition-colors shadow-inner"
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-2 flex flex-col gap-2.5">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-3.5 bg-gradient-to-r from-[#C5A880] to-[#dfc49d] hover:from-[#b89b73] hover:to-[#d0b48d] text-black font-bold text-xs uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg disabled:opacity-50"
+                >
+                  {loading ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <span>Verifying OTP Code...</span>
+                    </>
+                  ) : (
+                    <>
+                      <ShieldCheck className="w-4 h-4" />
+                      <span>Verify OTP & Continue</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAuthModalTab('forgot');
+                    setResetError('');
+                  }}
+                  className="w-full py-2.5 text-xs font-mono text-slate-400 hover:text-white transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Back to Step 1</span>
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* ========================================================================= */}
+          {/* 1.7. STEP 3: CHANGE PASSWORD POPUP */}
+          {/* ========================================================================= */}
+          {!isAuthenticated && authModalTab === 'set-password' && (
             <div className="space-y-4 animate-fadeIn">
               {resetDone ? (
                 /* Celebratory Success Screen */
-                <div className="p-6 bg-slate-900/90 rounded-2xl border border-emerald-500/30 text-center space-y-4">
+                <div className="p-6 bg-slate-900/90 rounded-2xl border border-emerald-500/30 text-center space-y-4 animate-fadeIn">
                   <div className="w-14 h-14 mx-auto rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 animate-bounce">
                     <CheckCircle2 className="w-8 h-8" />
                   </div>
@@ -709,7 +904,7 @@ export default function CustomerModal() {
                       Password Successfully Updated!
                     </h3>
                     <p className="text-xs text-slate-300 mt-1.5 leading-relaxed max-w-sm mx-auto">
-                      Your Supabase Auth credentials have been updated securely. You can now log in with your newly created password.
+                      Your Supabase Auth credentials have been changed securely. You can now log in with your new password.
                     </p>
                   </div>
                   <div className="pt-2">
@@ -731,30 +926,18 @@ export default function CustomerModal() {
                   </div>
                 </div>
               ) : (
-                /* Verification Form */
-                <form onSubmit={handleVerifyAndReset} className="space-y-4">
-                  {/* Status Banner */}
-                  <div className="p-3.5 bg-slate-900/80 rounded-2xl border border-slate-800 flex items-start gap-3">
-                    <div className="p-2 rounded-xl bg-[#C5A880]/10 text-[#C5A880] border border-[#C5A880]/20 shrink-0">
-                      <ShieldCheck className="w-4 h-4" />
+                /* Change Password Form */
+                <form onSubmit={handleUpdatePasswordOnly} className="space-y-4">
+                  <div className="p-4 bg-slate-900/80 rounded-2xl border border-slate-800">
+                    <div className="flex items-center gap-2 text-emerald-400 mb-1.5">
+                      <CheckCircle2 className="w-4 h-4" />
+                      <h3 className="text-xs font-mono font-bold uppercase tracking-wider">
+                        OTP Verified — Set New Password
+                      </h3>
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-mono text-[#C5A880] uppercase tracking-wider font-bold">
-                          Verification OTP Sent
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => setAuthModalTab('forgot')}
-                          className="text-[10px] font-mono text-slate-400 hover:text-white underline cursor-pointer"
-                        >
-                          Change
-                        </button>
-                      </div>
-                      <p className="text-xs text-slate-300 mt-0.5">
-                        Code sent to <strong className="text-white font-mono">{resetState?.maskedTarget || forgotIdentifier || 'your destination'}</strong>
-                      </p>
-                    </div>
+                    <p className="text-[12px] text-slate-400 leading-relaxed">
+                      Enter your new password below. It will update your actual password in <strong className="text-slate-200">Supabase Auth</strong>.
+                    </p>
                   </div>
 
                   {resetError && (
@@ -763,36 +946,6 @@ export default function CustomerModal() {
                       <span>{resetError}</span>
                     </div>
                   )}
-
-                  {/* 6-Digit OTP Input */}
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="text-[11px] font-mono uppercase text-slate-300">
-                        6-Digit Verification Code (OTP) *
-                      </label>
-                      <button
-                        type="button"
-                        onClick={handleResendOtp}
-                        disabled={countdown > 0 || loading}
-                        className={`text-[10px] font-mono flex items-center gap-1 transition-colors ${
-                          countdown > 0 ? 'text-slate-500 cursor-not-allowed' : 'text-[#C5A880] hover:underline cursor-pointer'
-                        }`}
-                      >
-                        <RefreshCw className={`w-3 h-3 ${countdown > 0 ? '' : 'animate-pulse'}`} />
-                        {countdown > 0 ? `Resend code in ${countdown}s` : 'Resend OTP Code'}
-                      </button>
-                    </div>
-                    <input
-                      type="text"
-                      maxLength={8}
-                      required
-                      autoFocus
-                      placeholder="e.g. 123456"
-                      value={otpCode}
-                      onChange={(e) => setOtpCode(e.target.value.replace(/[^0-9a-zA-Z]/g, '').slice(0, 6))}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-center text-lg font-mono tracking-[0.4em] text-white outline-none focus:border-[#C5A880] transition-colors"
-                    />
-                  </div>
 
                   {/* New Password */}
                   <div>
@@ -813,6 +966,7 @@ export default function CustomerModal() {
                       <input
                         type={showNewPassword ? 'text' : 'password'}
                         required
+                        autoFocus
                         placeholder="Minimum 6 characters"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
@@ -876,7 +1030,7 @@ export default function CustomerModal() {
                       ) : (
                         <>
                           <Lock className="w-4 h-4" />
-                          <span>Verify OTP & Update Password</span>
+                          <span>Update Supabase Password</span>
                         </>
                       )}
                     </button>
@@ -884,19 +1038,20 @@ export default function CustomerModal() {
                     <button
                       type="button"
                       onClick={() => {
-                        setAuthModalTab('login');
+                        setAuthModalTab('verify-otp');
                         setResetError('');
                       }}
                       className="w-full py-2.5 text-xs font-mono text-slate-400 hover:text-white transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <ArrowLeft className="w-3.5 h-3.5" />
-                      <span>Back to Sign In</span>
+                      <span>Back to OTP Step</span>
                     </button>
                   </div>
                 </form>
               )}
             </div>
           )}
+
 
 
           {/* ========================================================================= */}
