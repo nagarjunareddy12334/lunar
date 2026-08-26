@@ -51,13 +51,15 @@ export default function AdminLogin() {
       <div className="admin-login-page">
         <form className="admin-login-card" onSubmit={handleSubmit}>
           {/* Logo & Branding */}
-          <div className="admin-login-logo">
-            <div className="admin-login-lock">
-              <Lock size={24} />
-            </div>
-            <h1>LUNAR</h1>
-            <p>Admin Control Panel</p>
+          <div className="admin-login-logo flex flex-col items-center">
+            <img
+              src="/lunar-logo.jpg"
+              alt="LUNAR - Live Like You Dream"
+              className="h-16 w-auto object-contain mix-blend-screen filter drop-shadow-[0_0_12px_rgba(255,255,255,0.2)] mb-1"
+            />
+            <p className="text-xs font-mono text-[#C5A880] tracking-wider uppercase">Admin Control Panel</p>
           </div>
+
 
           {/* Error Message */}
           {error && (

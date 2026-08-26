@@ -105,23 +105,17 @@ export default function Navbar({ onOpenSearch, onNavigate, onSelectCategory, onG
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
             onMouseEnter={playHover}
-            className="group flex items-center gap-2.5 text-left cursor-pointer"
+            className="group flex items-center text-left cursor-pointer transition-transform duration-300 hover:scale-105"
+            aria-label="LUNAR - Live Like You Dream"
           >
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-slate-800 via-slate-600 to-white flex items-center justify-center p-0.5 shadow-md shadow-slate-900/50 group-hover:scale-110 transition-transform duration-300">
-              <div className="w-full h-full bg-[#090A0F] rounded-full flex items-center justify-center">
-                <Moon className="w-4 h-4 text-slate-200 fill-slate-200/40 transform -rotate-12 group-hover:rotate-12 transition-transform duration-500" />
-              </div>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xl md:text-2xl font-black tracking-[0.25em] text-white uppercase font-display leading-none">
-                LUNAR
-              </span>
-              <span className="text-[8px] tracking-[0.35em] text-[#C5A880] uppercase font-mono mt-0.5">
-                HEAVYWEIGHT TEES
-              </span>
-            </div>
+            <img
+              src="/lunar-logo.jpg"
+              alt="LUNAR - Live Like You Dream"
+              className="h-11 sm:h-12 md:h-14 w-auto object-contain mix-blend-screen filter drop-shadow-[0_0_12px_rgba(255,255,255,0.18)]"
+            />
           </button>
         </div>
+
 
         {/* Right Actions */}
         <div className="flex items-center gap-1.5 sm:gap-2.5">
