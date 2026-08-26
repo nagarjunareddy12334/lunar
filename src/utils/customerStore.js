@@ -270,6 +270,259 @@ export async function loginCustomer(identifier, password) {
 }
 
 /**
+ * Helper to mask an email or phone for display
+ */
+export function maskIdentifier(identifier) {
+  if (!identifier) return '';
+  const str = identifier.trim();
+  if (str.includes('@')) {
+    const [name, domain] = str.split('@');
+    if (name.length <= 2) {
+      return `${name[0]}***@${domain}`;
+    }
+    return `${name[0]}***${name[name.length - 1]}@${domain}`;
+  }
+  const digits = str.replace(/\D/g, '');
+  if (digits.length >= 7) {
+    return str.replace(/(\d{3})\d+(\d{4})/, '$1-***-$2');
+  }
+  return str.slice(0, 3) + '***' + str.slice(-2);
+}
+
+/**
+ * Format phone to E.164 if possible
+ */
+export function formatPhoneE164(phoneStr) {
+  const cleaned = (phoneStr || '').trim();
+  if (cleaned.startsWith('+')) {
+    return cleaned.replace(/[^+\d]/g, '');
+  }
+  const digits = cleaned.replace(/\D/g, '');
+  if (digits.length === 10) {
+    return `+1${digits}`;
+  }
+  return `+${digits}`;
+}
+
+/**
+ * Send Password Reset OTP via Supabase Auth
+ * OTP is ONLY required for Password Reset / Recovery flow.
+ */
+export async function sendPasswordResetOtp(identifier) {
+  const cleanId = (identifier || '').trim();
+  if (!cleanId) {
+    return { success: false, error: 'Please enter your email or registered mobile number.' };
+  }
+
+  const isEmail = cleanId.includes('@');
+  const cleanEmail = cleanId.toLowerCase();
+
+  try {
+    if (isEmail) {
+      // 1. Supabase native recovery email / OTP
+      const { data, error } = await supabase.auth.resetPasswordForEmail(cleanEmail);
+
+      if (error) {
+        // Fallback to signInWithOtp if resetPasswordForEmail hits email config constraint
+        const { data: otpData, error: otpError } = await supabase.auth.signInWithOtp({
+          email: cleanEmail,
+          options: { shouldCreateUser: false },
+        });
+
+        if (otpError) {
+          console.warn('Supabase email OTP error:', otpError.message);
+          if (otpError.message?.toLowerCase().includes('rate limit') || otpError.message?.toLowerCase().includes('seconds')) {
+            return { success: false, error: 'Please wait 60 seconds before requesting another verification OTP.' };
+          }
+          return { success: false, error: otpError.message || 'Failed to send OTP code to this email.' };
+        }
+      }
+
+      return {
+        success: true,
+        method: 'email',
+        target: cleanEmail,
+        maskedTarget: maskIdentifier(cleanEmail),
+        message: `A 6-digit verification OTP has been dispatched to ${maskIdentifier(cleanEmail)}.`,
+      };
+    } else {
+      // 2. Mobile Phone SMS OTP
+      const formattedPhone = formatPhoneE164(cleanId);
+      const { data, error } = await supabase.auth.signInWithOtp({
+        phone: formattedPhone,
+        options: { shouldCreateUser: false },
+      });
+
+      if (error) {
+        console.warn('Supabase phone OTP notice:', error.message);
+        if (error.message?.toLowerCase().includes('rate limit')) {
+          return { success: false, error: 'Please wait before requesting another SMS OTP.' };
+        }
+        return { success: false, error: error.message || 'Failed to send SMS OTP to this phone number.' };
+      }
+
+      return {
+        success: true,
+        method: 'phone',
+        target: formattedPhone,
+        maskedTarget: maskIdentifier(cleanId),
+        message: `A verification OTP code has been dispatched to ${maskIdentifier(cleanId)}.`,
+      };
+    }
+  } catch (err) {
+    console.error('Password reset OTP exception:', err);
+    return { success: false, error: err.message || 'Unable to connect to Supabase Auth.' };
+  }
+}
+
+/**
+ * Verify Password Reset OTP using Supabase Auth
+ */
+export async function verifyPasswordResetOtp(identifier, otpCode) {
+  const cleanId = (identifier || '').trim();
+  const cleanOtp = (otpCode || '').trim().replace(/\s/g, '');
+
+  if (!cleanId || !cleanOtp) {
+    return { success: false, error: 'Please enter the 6-digit OTP code received.' };
+  }
+
+  const isEmail = cleanId.includes('@');
+  const cleanEmail = cleanId.toLowerCase();
+
+  try {
+    if (isEmail) {
+      // 1. Try recovery type OTP
+      let { data, error } = await supabase.auth.verifyOtp({
+        email: cleanEmail,
+        token: cleanOtp,
+        type: 'recovery',
+      });
+
+      // 2. Try email OTP type if recovery type returned error
+      if (error) {
+        const retry = await supabase.auth.verifyOtp({
+          email: cleanEmail,
+          token: cleanOtp,
+          type: 'email',
+        });
+        if (!retry.error && retry.data?.session) {
+          data = retry.data;
+          error = null;
+        }
+      }
+
+      if (error) {
+        return {
+          success: false,
+          error: error.message?.toLowerCase().includes('expired')
+            ? 'The OTP code has expired. Please request a new code.'
+            : 'Invalid OTP code. Please double-check and try again.',
+        };
+      }
+
+      return {
+        success: true,
+        session: data?.session,
+        user: data?.user,
+        message: 'OTP verified successfully. You may now set your new password.',
+      };
+    } else {
+      // Phone OTP verification
+      const formattedPhone = formatPhoneE164(cleanId);
+      const { data, error } = await supabase.auth.verifyOtp({
+        phone: formattedPhone,
+        token: cleanOtp,
+        type: 'sms',
+      });
+
+      if (error) {
+        return {
+          success: false,
+          error: error.message?.toLowerCase().includes('expired')
+            ? 'The OTP code has expired. Please request a new code.'
+            : 'Invalid SMS OTP code. Please double-check and try again.',
+        };
+      }
+
+      return {
+        success: true,
+        session: data?.session,
+        user: data?.user,
+        message: 'Mobile OTP verified. Please set your new password.',
+      };
+    }
+  } catch (err) {
+    console.error('Verify OTP exception:', err);
+    return { success: false, error: err.message || 'OTP verification failed.' };
+  }
+}
+
+/**
+ * Update Supabase Auth Password
+ * Directly updates user's actual password in Supabase Auth (auth.users)
+ */
+export async function updateSupabaseAuthPassword(newPassword, identifier = '') {
+  const cleanPass = (newPassword || '').trim();
+  if (!cleanPass || cleanPass.length < 6) {
+    return { success: false, error: 'Password must be at least 6 characters long.' };
+  }
+
+  try {
+    // 1. Direct update in Supabase Auth
+    const { data, error } = await supabase.auth.updateUser({
+      password: cleanPass,
+    });
+
+    if (error) {
+      console.warn('Supabase auth password update error:', error.message);
+      return { success: false, error: error.message || 'Failed to update password in Supabase Auth.' };
+    }
+
+    // 2. Synchronize customers table and local fallback if present
+    const cleanId = (identifier || data?.user?.email || '').trim();
+    if (cleanId) {
+      const isEmail = cleanId.includes('@');
+      try {
+        if (isEmail) {
+          await supabase
+            .from('customers')
+            .update({ password: cleanPass, updated_at: new Date().toISOString() })
+            .eq('email', cleanId.toLowerCase());
+        } else {
+          await supabase
+            .from('customers')
+            .update({ password: cleanPass, updated_at: new Date().toISOString() })
+            .eq('phone', cleanId);
+        }
+      } catch (e) {
+        // Silent sync
+      }
+
+      const localList = getLocalCustomers();
+      const idx = localList.findIndex(
+        (c) =>
+          (c.email && c.email.toLowerCase() === cleanId.toLowerCase()) ||
+          (c.phone && c.phone === cleanId)
+      );
+      if (idx !== -1) {
+        localList[idx].password = cleanPass;
+        saveLocalCustomers(localList);
+      }
+    }
+
+    return {
+      success: true,
+      message: 'Your Supabase Auth password has been updated securely.',
+      user: data?.user,
+    };
+  } catch (err) {
+    console.error('Password change exception:', err);
+    return { success: false, error: err.message || 'Failed to update password.' };
+  }
+}
+
+
+/**
  * Update Customer Profile & Delivery Address
  */
 export async function updateCustomerProfile(id, updates) {

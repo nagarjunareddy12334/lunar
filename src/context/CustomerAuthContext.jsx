@@ -1,9 +1,14 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { supabase } from '../utils/supabase';
 import {
   loginCustomer,
   registerCustomer,
   updateCustomerProfile,
   getCustomerOrders,
+  sendPasswordResetOtp,
+  verifyPasswordResetOtp,
+  updateSupabaseAuthPassword,
+  maskIdentifier,
 } from '../utils/customerStore';
 
 const CustomerAuthContext = createContext(null);
@@ -25,8 +30,36 @@ export function CustomerAuthProvider({ children }) {
 
   const [orders, setOrders] = useState([]);
   const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [authModalTab, setAuthModalTab] = useState('login'); // 'login' | 'register' | 'profile' | 'orders'
+  const [authModalTab, setAuthModalTab] = useState('login'); // 'login' | 'register' | 'forgot' | 'verify-otp' | 'profile' | 'orders' | 'wishlist'
   const [loading, setLoading] = useState(false);
+
+  // Recovery / Reset Session State
+  const [resetState, setResetState] = useState({
+    identifier: '',
+    maskedTarget: '',
+    method: 'email', // 'email' | 'phone'
+    otpVerified: false,
+  });
+
+  // Listen for Supabase password recovery event from email magic link
+  useEffect(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setResetState({
+          identifier: session?.user?.email || '',
+          maskedTarget: maskIdentifier(session?.user?.email || ''),
+          method: 'email',
+          otpVerified: true,
+        });
+        setAuthModalTab('verify-otp');
+        setAuthModalOpen(true);
+      }
+    });
+
+    return () => {
+      authListener?.subscription?.unsubscribe();
+    };
+  }, []);
 
   // Sync state with storage
   useEffect(() => {
@@ -73,9 +106,14 @@ export function CustomerAuthProvider({ children }) {
     return { success: false, error: res.error || 'Registration failed' };
   }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
     setCustomer(null);
     localStorage.removeItem(SESSION_KEY);
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {
+      // Silent catch
+    }
   }, []);
 
   const updateProfile = useCallback(async (updates) => {
@@ -90,6 +128,56 @@ export function CustomerAuthProvider({ children }) {
     return { success: false, error: res.error || 'Profile update failed' };
   }, [customer]);
 
+  // Request Password Reset OTP (Email or Mobile)
+  const sendResetOtp = useCallback(async (identifier) => {
+    setLoading(true);
+    const res = await sendPasswordResetOtp(identifier);
+    setLoading(false);
+    if (res.success) {
+      setResetState({
+        identifier,
+        maskedTarget: res.maskedTarget || maskIdentifier(identifier),
+        method: res.method || 'email',
+        otpVerified: false,
+      });
+      return { success: true, maskedTarget: res.maskedTarget, message: res.message };
+    }
+    return { success: false, error: res.error || 'Failed to send verification code.' };
+  }, []);
+
+  // Verify the OTP code
+  const verifyResetOtp = useCallback(async (identifier, otpCode) => {
+    setLoading(true);
+    const res = await verifyPasswordResetOtp(identifier, otpCode);
+    setLoading(false);
+    if (res.success) {
+      setResetState((prev) => ({
+        ...prev,
+        otpVerified: true,
+      }));
+      return { success: true, message: res.message };
+    }
+    return { success: false, error: res.error || 'OTP verification failed.' };
+  }, []);
+
+  // Update password in Supabase Auth
+  const updatePassword = useCallback(async (newPassword, identifier = '') => {
+    setLoading(true);
+    const targetId = identifier || resetState.identifier;
+    const res = await updateSupabaseAuthPassword(newPassword, targetId);
+    setLoading(false);
+    if (res.success) {
+      setResetState({
+        identifier: '',
+        maskedTarget: '',
+        method: 'email',
+        otpVerified: false,
+      });
+      return { success: true, message: res.message };
+    }
+    return { success: false, error: res.error || 'Failed to update password.' };
+  }, [resetState.identifier]);
+
   const openAuthModal = useCallback((tab = 'login') => {
     setAuthModalTab(tab);
     setAuthModalOpen(true);
@@ -102,11 +190,16 @@ export function CustomerAuthProvider({ children }) {
         isAuthenticated,
         loading,
         orders,
+        resetState,
+        setResetState,
         login,
         register,
         logout,
         updateProfile,
         refreshOrders,
+        sendResetOtp,
+        verifyResetOtp,
+        updatePassword,
         authModalOpen,
         setAuthModalOpen,
         authModalTab,
@@ -124,3 +217,4 @@ export function useCustomerAuth() {
   if (!ctx) throw new Error('useCustomerAuth must be used within CustomerAuthProvider');
   return ctx;
 }
+
