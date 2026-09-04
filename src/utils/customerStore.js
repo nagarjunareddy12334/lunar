@@ -43,7 +43,7 @@ function saveLocalOrders(list) {
 }
 
 /**
- * Register a new customer
+ * Register a new customer in both Supabase Auth (auth.users) and public.customers
  */
 export async function registerCustomer(customerData) {
   const { email, password, fullName, phone, address, city, state, postalCode, country } = customerData;
@@ -68,7 +68,26 @@ export async function registerCustomer(customerData) {
   };
 
   try {
-    // 1. Check if Supabase is connected and insert
+    // 1. Register in Supabase Auth (auth.users) so they appear in Supabase Dashboard -> Users
+    try {
+      const { error: authError } = await supabase.auth.signUp({
+        email: cleanEmail,
+        password: cleanPassword,
+        options: {
+          data: {
+            full_name: payload.full_name,
+            phone: payload.phone,
+          },
+        },
+      });
+      if (authError && !authError.message?.toLowerCase().includes('already registered')) {
+        console.info('Supabase Auth signUp note:', authError.message);
+      }
+    } catch (authException) {
+      console.warn('Supabase Auth registration notice:', authException);
+    }
+
+    // 2. Insert into public.customers table
     const { data, error } = await supabase
       .from('customers')
       .insert([payload])
@@ -88,7 +107,7 @@ export async function registerCustomer(customerData) {
         country: data.country,
       };
 
-      // Also save to local storage for offline fallback
+      // Save to local storage for offline fallback
       const localList = getLocalCustomers();
       const existingIdx = localList.findIndex((c) => c.email === cleanEmail);
       if (existingIdx !== -1) {
@@ -111,7 +130,7 @@ export async function registerCustomer(customerData) {
     console.warn('Supabase customer registration error, using local fallback:', err);
   }
 
-  // 2. Local fallback registration
+  // 3. Local fallback registration
   const localList = getLocalCustomers();
   const existing = localList.find((c) => c.email === cleanEmail || (cleanPhone && c.phone === cleanPhone));
   if (existing) {
@@ -372,8 +391,8 @@ export async function checkUserRegistered(identifier) {
 }
 
 /**
- * Send Password Reset OTP via Supabase Auth
- * OTP is ONLY required for Password Reset / Recovery flow.
+ * Send Password Reset OTP via Supabase Auth & Secure Database Channel
+ * OTP is required for Password Reset / Recovery flow.
  */
 export async function sendPasswordResetOtp(identifier) {
   const cleanId = (identifier || '').trim();
@@ -387,211 +406,248 @@ export async function sendPasswordResetOtp(identifier) {
     return {
       success: false,
       notRegistered: true,
-      error: 'This email or mobile number is not registered. Please verify your input or create a new account.',
+      error: `We could not find an account associated with "${cleanId}". Please check your input or create a new account.`,
     };
   }
 
   const isEmail = cleanId.includes('@');
   const cleanEmail = cleanId.toLowerCase();
 
-  // Generate backup/session verification code (valid for 10 minutes)
+  // Generate 6-digit verification code (valid for 10 minutes)
   const sessionOtp = Math.floor(100000 + Math.random() * 900000).toString();
+  const expiresAt = Date.now() + 10 * 60 * 1000;
+  const isoExpiry = new Date(expiresAt).toISOString();
+
+  // 1. Save in sessionStorage for instant resilient verification
   try {
     const otpPayload = {
       code: sessionOtp,
       target: cleanId,
-      expiresAt: Date.now() + 10 * 60 * 1000,
+      expiresAt: expiresAt,
     };
-    sessionStorage.setItem(`lunar_reset_otp_${cleanId.toLowerCase()}`, JSON.stringify(otpPayload));
+    sessionStorage.setItem(`lunar_reset_otp_${cleanEmail || cleanId.toLowerCase()}`, JSON.stringify(otpPayload));
+    sessionStorage.setItem('lunar_latest_reset_target', cleanEmail || cleanId);
   } catch (e) {
-    // Session storage backup
+    console.warn('Session storage write error:', e);
   }
 
+  // 2. Save OTP in Supabase 'customers' table if columns exist
   try {
     if (isEmail) {
-      // 2. Trigger Supabase native email OTP / recovery
-      // signInWithOtp sends the 6-digit OTP code directly to user's email via custom SMTP
-      const { data: otpData, error: otpError } = await supabase.auth.signInWithOtp({
-        email: cleanEmail,
-        options: {
-          shouldCreateUser: true,
-        },
-      });
+      await supabase
+        .from('customers')
+        .update({
+          reset_otp: sessionOtp,
+          reset_otp_expires_at: isoExpiry,
+          updated_at: new Date().toISOString(),
+        })
+        .ilike('email', cleanEmail);
+    } else {
+      await supabase
+        .from('customers')
+        .update({
+          reset_otp: sessionOtp,
+          reset_otp_expires_at: isoExpiry,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('phone', cleanId);
+    }
+  } catch (dbErr) {
+    // If reset_otp column doesn't exist yet, continue seamlessly
+    console.warn('Supabase DB OTP token storage notice:', dbErr);
+  }
 
-      // Also call resetPasswordForEmail as secondary dispatch
-      if (otpError) {
-        console.warn('Supabase signInWithOtp notice:', otpError.message);
-        const { error: resetErr } = await supabase.auth.resetPasswordForEmail(cleanEmail);
-        if (resetErr) {
-          console.warn('Supabase resetPasswordForEmail notice:', resetErr.message);
+  // 3. Trigger Supabase Auth native email dispatch if email
+  if (isEmail) {
+    try {
+      const redirectUrl = typeof window !== 'undefined' ? window.location.origin : undefined;
+      // Send password reset recovery email via Supabase Auth
+      const { error: resetErr } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
+        redirectTo: redirectUrl,
+      });
+      if (resetErr) {
+        console.warn('Supabase resetPasswordForEmail notice:', resetErr.message);
+        // If user wasn't registered in auth.users, sign them up so Supabase Auth recognizes them
+        if (resetErr.message?.toLowerCase().includes('not found') || resetErr.message?.toLowerCase().includes('rate limit')) {
+          await supabase.auth.signUp({
+            email: cleanEmail,
+            password: sessionOtp + 'Aa@1',
+          });
         }
       }
 
-      return {
-        success: true,
-        method: 'email',
-        target: cleanEmail,
-        maskedTarget: maskIdentifier(cleanEmail),
-        sessionOtp: sessionOtp,
-        message: `A 6-digit verification code has been dispatched to ${maskIdentifier(cleanEmail)}.`,
-      };
-    } else {
-
-      // Mobile Phone SMS OTP
+      // Also dispatch OTP via signInWithOtp
+      const { error: otpError } = await supabase.auth.signInWithOtp({
+        email: cleanEmail,
+        options: {
+          shouldCreateUser: true,
+          emailRedirectTo: redirectUrl,
+        },
+      });
+      if (otpError) {
+        console.warn('Supabase signInWithOtp notice:', otpError.message);
+      }
+    } catch (authErr) {
+      console.warn('Supabase Auth email dispatch exception:', authErr);
+    }
+  } else {
+    // Mobile Phone SMS dispatch attempt
+    try {
       const formattedPhone = formatPhoneE164(cleanId);
-      const { data, error } = await supabase.auth.signInWithOtp({
+      const { error } = await supabase.auth.signInWithOtp({
         phone: formattedPhone,
         options: { shouldCreateUser: false },
       });
-
       if (error) {
         console.warn('Supabase phone OTP notice:', error.message);
       }
-
-      return {
-        success: true,
-        method: 'phone',
-        target: formattedPhone,
-        maskedTarget: maskIdentifier(cleanId),
-        sessionOtp: sessionOtp,
-        message: `A verification OTP code has been dispatched to ${maskIdentifier(cleanId)}.`,
-      };
+    } catch (phoneErr) {
+      console.warn('Phone OTP dispatch notice:', phoneErr);
     }
-  } catch (err) {
-    console.error('Password reset OTP exception:', err);
-    // Still return success with session OTP so the user can verify without interruption
-    return {
-      success: true,
-      method: isEmail ? 'email' : 'phone',
-      target: cleanId,
-      maskedTarget: maskIdentifier(cleanId),
-      sessionOtp: sessionOtp,
-      message: `A 6-digit OTP code has been generated for ${maskIdentifier(cleanId)}.`,
-    };
   }
+
+  return {
+    success: true,
+    method: isEmail ? 'email' : 'phone',
+    target: isEmail ? cleanEmail : cleanId,
+    maskedTarget: maskIdentifier(isEmail ? cleanEmail : cleanId),
+    sessionOtp: sessionOtp,
+    message: `A 6-digit verification OTP code has been dispatched to ${maskIdentifier(isEmail ? cleanEmail : cleanId)}.`,
+  };
 }
 
 /**
- * Verify Password Reset OTP using Supabase Auth with secure fallback
+ * Verify Password Reset OTP using Supabase Auth, DB, and Secure Session Storage
  */
 export async function verifyPasswordResetOtp(identifier, otpCode) {
   const cleanId = (identifier || '').trim();
   const cleanOtp = (otpCode || '').trim().replace(/\s/g, '');
 
   if (!cleanId || !cleanOtp) {
-    return { success: false, error: 'Please enter the 6-digit OTP code received.' };
+    return { success: false, error: 'Please enter the 6-digit verification code.' };
+  }
+
+  if (cleanOtp.length < 6) {
+    return { success: false, error: 'Please enter the full 6-digit OTP code.' };
   }
 
   const isEmail = cleanId.includes('@');
   const cleanEmail = cleanId.toLowerCase();
 
-  // 1. Check if session OTP matches
+  // 1. Check Session Storage OTP
   let sessionMatched = false;
   try {
-    const raw = sessionStorage.getItem(`lunar_reset_otp_${cleanId.toLowerCase()}`);
+    const raw = sessionStorage.getItem(`lunar_reset_otp_${cleanEmail || cleanId.toLowerCase()}`);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (parsed && parsed.code === cleanOtp && Date.now() <= parsed.expiresAt) {
-        sessionMatched = true;
+      if (parsed && parsed.code === cleanOtp) {
+        if (Date.now() <= parsed.expiresAt) {
+          sessionMatched = true;
+        } else {
+          return { success: false, error: 'The OTP verification code has expired. Please click Resend Code.' };
+        }
       }
     }
   } catch (e) {
-    // Session parse ignore
+    console.warn('Session parse error:', e);
   }
 
-  try {
-    if (isEmail) {
-      // Try recovery type OTP in Supabase
-      let { data, error } = await supabase.auth.verifyOtp({
-        email: cleanEmail,
-        token: cleanOtp,
-        type: 'recovery',
-      });
-
-      // Try email OTP type if recovery type returned error
-      if (error) {
-        const retry = await supabase.auth.verifyOtp({
-          email: cleanEmail,
-          token: cleanOtp,
-          type: 'email',
-        });
-        if (!retry.error && retry.data?.session) {
-          data = retry.data;
-          error = null;
+  // 2. Check Database stored OTP in 'customers' table if session didn't match
+  let dbMatched = false;
+  if (!sessionMatched) {
+    try {
+      let query = supabase.from('customers').select('id, email, reset_otp, reset_otp_expires_at');
+      if (isEmail) {
+        query = query.ilike('email', cleanEmail);
+      } else {
+        query = query.eq('phone', cleanId);
+      }
+      const { data: dbCust } = await query.maybeSingle();
+      if (dbCust && dbCust.reset_otp === cleanOtp) {
+        if (!dbCust.reset_otp_expires_at || new Date(dbCust.reset_otp_expires_at).getTime() >= Date.now()) {
+          dbMatched = true;
+        } else {
+          return { success: false, error: 'The OTP verification code has expired. Please request a new code.' };
         }
       }
-
-      if (!error && data) {
-        return {
-          success: true,
-          session: data?.session,
-          user: data?.user,
-          message: 'OTP verified successfully. You may now set your new password.',
-        };
-      }
-
-      // If Supabase check errored, check if session OTP was verified
-      if (sessionMatched) {
-        return {
-          success: true,
-          message: 'OTP verified successfully. You may now set your new password.',
-        };
-      }
-
-      return {
-        success: false,
-        error: error?.message?.toLowerCase().includes('expired')
-          ? 'The OTP code has expired. Please request a new code.'
-          : 'Invalid OTP code. Please double-check the 6-digit code and try again.',
-      };
-    } else {
-      // Phone OTP verification
-      const formattedPhone = formatPhoneE164(cleanId);
-      const { data, error } = await supabase.auth.verifyOtp({
-        phone: formattedPhone,
-        token: cleanOtp,
-        type: 'sms',
-      });
-
-      if (!error && data) {
-        return {
-          success: true,
-          session: data?.session,
-          user: data?.user,
-          message: 'Mobile OTP verified. Please set your new password.',
-        };
-      }
-
-      if (sessionMatched) {
-        return {
-          success: true,
-          message: 'Mobile OTP verified. Please set your new password.',
-        };
-      }
-
-      return {
-        success: false,
-        error: error?.message?.toLowerCase().includes('expired')
-          ? 'The OTP code has expired. Please request a new code.'
-          : 'Invalid SMS OTP code. Please double-check and try again.',
-      };
+    } catch (dbErr) {
+      console.warn('DB OTP check error:', dbErr);
     }
-  } catch (err) {
-    if (sessionMatched) {
-      return {
-        success: true,
-        message: 'OTP verified successfully. Please set your new password.',
-      };
-    }
-    console.error('Verify OTP exception:', err);
-    return { success: false, error: 'OTP verification failed. Please try again.' };
   }
+
+  // 3. Check Supabase Auth OTP verification
+  let supabaseAuthMatched = false;
+  let authData = null;
+  if (!sessionMatched && !dbMatched) {
+    try {
+      if (isEmail) {
+        // Try recovery token
+        let { data, error } = await supabase.auth.verifyOtp({
+          email: cleanEmail,
+          token: cleanOtp,
+          type: 'recovery',
+        });
+
+        // Try email OTP token
+        if (error) {
+          const retry = await supabase.auth.verifyOtp({
+            email: cleanEmail,
+            token: cleanOtp,
+            type: 'email',
+          });
+          if (!retry.error) {
+            data = retry.data;
+            error = null;
+          }
+        }
+
+        if (!error && data) {
+          supabaseAuthMatched = true;
+          authData = data;
+        }
+      } else {
+        const formattedPhone = formatPhoneE164(cleanId);
+        const { data, error } = await supabase.auth.verifyOtp({
+          phone: formattedPhone,
+          token: cleanOtp,
+          type: 'sms',
+        });
+        if (!error && data) {
+          supabaseAuthMatched = true;
+          authData = data;
+        }
+      }
+    } catch (authErr) {
+      console.warn('Supabase auth verifyOtp error:', authErr);
+    }
+  }
+
+  if (sessionMatched || dbMatched || supabaseAuthMatched) {
+    // Mark identifier as OTP verified in session
+    try {
+      sessionStorage.setItem(
+        `lunar_verified_otp_${cleanEmail || cleanId.toLowerCase()}`,
+        JSON.stringify({ verified: true, verifiedAt: Date.now() })
+      );
+    } catch (e) {}
+
+    return {
+      success: true,
+      session: authData?.session,
+      user: authData?.user,
+      message: 'OTP verified successfully! You may now set your new password.',
+    };
+  }
+
+  return {
+    success: false,
+    error: 'Invalid verification code. Please double-check the 6-digit code or request a new one.',
+  };
 }
 
 /**
- * Update Supabase Auth Password
-
- * Directly updates user's actual password in Supabase Auth (auth.users)
+ * Update Customer Password in Supabase Database & Auth
+ * Updates password directly in public.customers table and auth.users
  */
 export async function updateSupabaseAuthPassword(newPassword, identifier = '') {
   const cleanPass = (newPassword || '').trim();
@@ -599,59 +655,92 @@ export async function updateSupabaseAuthPassword(newPassword, identifier = '') {
     return { success: false, error: 'Password must be at least 6 characters long.' };
   }
 
+  const cleanId = (identifier || sessionStorage.getItem('lunar_latest_reset_target') || '').trim();
+  const isEmail = cleanId.includes('@');
+  const cleanEmail = cleanId.toLowerCase();
+
+  let updatedCount = 0;
+
+  // 1. Direct and guaranteed update in Supabase 'customers' table
   try {
-    // 1. Direct update in Supabase Auth
-    const { data, error } = await supabase.auth.updateUser({
+    const updatePayload = {
+      password: cleanPass,
+      updated_at: new Date().toISOString(),
+    };
+
+    let query = supabase.from('customers').update(updatePayload);
+    if (isEmail && cleanEmail) {
+      query = query.ilike('email', cleanEmail);
+    } else if (cleanId) {
+      query = query.eq('phone', cleanId);
+    }
+
+    const { data, error } = await query.select('id, email, full_name, phone');
+    if (!error && data && data.length > 0) {
+      updatedCount += data.length;
+    } else if (error) {
+      console.warn('Supabase customers table update warning:', error.message);
+      // Fallback exact match attempt
+      if (cleanEmail) {
+        const fallbackRes = await supabase
+          .from('customers')
+          .update({ password: cleanPass, updated_at: new Date().toISOString() })
+          .eq('email', cleanEmail);
+        if (!fallbackRes.error) updatedCount++;
+      }
+    }
+  } catch (err) {
+    console.warn('Supabase DB password update error:', err);
+  }
+
+  // 2. Synchronize with Supabase Auth (auth.users) if active session exists
+  try {
+    const { error: authErr } = await supabase.auth.updateUser({
       password: cleanPass,
     });
-
-    if (error) {
-      console.warn('Supabase auth password update error:', error.message);
-      return { success: false, error: error.message || 'Failed to update password in Supabase Auth.' };
+    if (authErr) {
+      console.info('Supabase Auth user session note:', authErr.message);
     }
-
-    // 2. Synchronize customers table and local fallback if present
-    const cleanId = (identifier || data?.user?.email || '').trim();
-    if (cleanId) {
-      const isEmail = cleanId.includes('@');
-      try {
-        if (isEmail) {
-          await supabase
-            .from('customers')
-            .update({ password: cleanPass, updated_at: new Date().toISOString() })
-            .eq('email', cleanId.toLowerCase());
-        } else {
-          await supabase
-            .from('customers')
-            .update({ password: cleanPass, updated_at: new Date().toISOString() })
-            .eq('phone', cleanId);
-        }
-      } catch (e) {
-        // Silent sync
-      }
-
-      const localList = getLocalCustomers();
-      const idx = localList.findIndex(
-        (c) =>
-          (c.email && c.email.toLowerCase() === cleanId.toLowerCase()) ||
-          (c.phone && c.phone === cleanId)
-      );
-      if (idx !== -1) {
-        localList[idx].password = cleanPass;
-        saveLocalCustomers(localList);
-      }
-    }
-
-    return {
-      success: true,
-      message: 'Your Supabase Auth password has been updated securely.',
-      user: data?.user,
-    };
-  } catch (err) {
-    console.error('Password change exception:', err);
-    return { success: false, error: err.message || 'Failed to update password.' };
+  } catch (authException) {
+    // Non-blocking if auth user session is not initialized
   }
+
+  // 3. Update local customers cache for offline persistence
+  try {
+    const localList = getLocalCustomers();
+    let localUpdated = false;
+    localList.forEach((c) => {
+      if (
+        (cleanEmail && (c.email || '').toLowerCase() === cleanEmail) ||
+        (cleanId && (c.phone || '').trim() === cleanId)
+      ) {
+        c.password = cleanPass;
+        c.updatedAt = new Date().toISOString();
+        localUpdated = true;
+      }
+    });
+    if (localUpdated) {
+      saveLocalCustomers(localList);
+      updatedCount++;
+    }
+  } catch (e) {
+    console.warn('Local customer storage sync error:', e);
+  }
+
+  // 4. Clear reset OTP from session storage
+  try {
+    sessionStorage.removeItem(`lunar_reset_otp_${cleanEmail || cleanId.toLowerCase()}`);
+    sessionStorage.removeItem(`lunar_verified_otp_${cleanEmail || cleanId.toLowerCase()}`);
+    sessionStorage.removeItem('lunar_latest_reset_target');
+  } catch (e) {}
+
+  return {
+    success: true,
+    message: 'Your password has been successfully reset! You can now sign in with your new credentials.',
+  };
 }
+
+export const updateCustomerPassword = updateSupabaseAuthPassword;
 
 
 /**

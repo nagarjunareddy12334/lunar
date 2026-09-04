@@ -29,6 +29,7 @@ import {
   Key,
   Shield,
   Check,
+  Copy,
 } from 'lucide-react';
 import { useCustomerAuth } from '../../context/CustomerAuthContext';
 import { useWishlist } from '../../context/WishlistContext';
@@ -815,20 +816,33 @@ export default function CustomerModal() {
                     <span className="text-xl font-mono font-black text-white tracking-[0.35em]">
                       {resetState.sessionOtp}
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setOtpCode(resetState.sessionOtp);
-                        showToast('OTP code auto-filled!', 'success');
-                      }}
-                      className="px-3 py-1.5 bg-[#C5A880] hover:bg-[#b89b73] text-black rounded-lg text-xs font-bold font-mono uppercase tracking-wider transition-all flex items-center gap-1 shadow-md cursor-pointer"
-                    >
-                      <Check className="w-3.5 h-3.5" />
-                      <span>Auto-fill OTP</span>
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(resetState.sessionOtp);
+                          showToast('OTP copied to clipboard!', 'success');
+                        }}
+                        className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-1 border border-slate-700 cursor-pointer"
+                      >
+                        <Copy className="w-3.5 h-3.5" />
+                        <span>Copy</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setOtpCode(resetState.sessionOtp);
+                          showToast('OTP code auto-filled!', 'success');
+                        }}
+                        className="px-3 py-1.5 bg-[#C5A880] hover:bg-[#b89b73] text-black rounded-lg text-xs font-bold font-mono uppercase tracking-wider transition-all flex items-center gap-1 shadow-md cursor-pointer"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Auto-fill OTP</span>
+                      </button>
+                    </div>
                   </div>
                   <p className="text-[10.5px] text-slate-400">
-                    Dispatched to your registered destination. Click <strong>Auto-fill OTP</strong> to proceed directly.
+                    Dispatched to your registered destination. If email delivery is delayed, click <strong>Auto-fill OTP</strong> to proceed directly.
                   </p>
                 </div>
               )}

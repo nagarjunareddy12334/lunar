@@ -21,9 +21,15 @@ CREATE TABLE IF NOT EXISTS public.customers (
   state TEXT,
   postal_code TEXT,
   country TEXT DEFAULT 'United States',
+  reset_otp TEXT,
+  reset_otp_expires_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- Ensure reset_otp columns exist if table was already created earlier
+ALTER TABLE public.customers ADD COLUMN IF NOT EXISTS reset_otp TEXT;
+ALTER TABLE public.customers ADD COLUMN IF NOT EXISTS reset_otp_expires_at TIMESTAMPTZ;
 
 -- Enable RLS for customers table
 ALTER TABLE public.customers ENABLE ROW LEVEL SECURITY;
@@ -40,6 +46,71 @@ CREATE POLICY "Allow customer registration" ON public.customers
 DROP POLICY IF EXISTS "Allow customer profile updates" ON public.customers;
 CREATE POLICY "Allow customer profile updates" ON public.customers
   FOR UPDATE USING (true);
+
+-- ------------------------------------------------------------------------------
+-- AUTOMATIC SYNC TRIGGER: Customers -> Supabase Auth (auth.users)
+-- Ensures every newly registered customer immediately appears in Supabase Users
+-- ------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.handle_new_customer()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM auth.users WHERE email = NEW.email) THEN
+    INSERT INTO auth.users (
+      id,
+      instance_id,
+      email,
+      encrypted_password,
+      email_confirmed_at,
+      raw_app_meta_data,
+      raw_user_meta_data,
+      created_at,
+      updated_at,
+      role,
+      aud,
+      confirmation_token
+    ) VALUES (
+      NEW.id,
+      '00000000-0000-0000-0000-000000000000',
+      NEW.email,
+      crypt(NEW.password, gen_salt('bf')),
+      now(),
+      '{"provider":"email","providers":["email"]}',
+      jsonb_build_object('full_name', NEW.full_name, 'phone', NEW.phone),
+      now(),
+      now(),
+      'authenticated',
+      'authenticated',
+      ''
+    );
+
+    INSERT INTO auth.identities (
+      id,
+      user_id,
+      identity_data,
+      provider,
+      provider_id,
+      last_sign_in_at,
+      created_at,
+      updated_at
+    ) VALUES (
+      gen_random_uuid(),
+      NEW.id,
+      jsonb_build_object('sub', NEW.id, 'email', NEW.email),
+      'email',
+      NEW.id::text,
+      now(),
+      now(),
+      now()
+    );
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_customer_created ON public.customers;
+CREATE TRIGGER on_customer_created
+  AFTER INSERT ON public.customers
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_customer();
 
 -- ------------------------------------------------------------------------------
 -- 2. ORDERS TABLE (Includes COD & Card Payment Details)
