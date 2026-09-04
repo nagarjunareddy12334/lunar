@@ -45,13 +45,14 @@ export function CustomerAuthProvider({ children }) {
   useEffect(() => {
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'PASSWORD_RECOVERY') {
+        const email = session?.user?.email || '';
         setResetState({
-          identifier: session?.user?.email || '',
-          maskedTarget: maskIdentifier(session?.user?.email || ''),
+          identifier: email,
+          maskedTarget: maskIdentifier(email),
           method: 'email',
           otpVerified: true,
         });
-        setAuthModalTab('verify-otp');
+        setAuthModalTab('set-password');
         setAuthModalOpen(true);
       }
     });

@@ -213,7 +213,7 @@ export default function CustomerModal() {
 
     const res = await sendResetOtp(target);
     if (res.success) {
-      showToast(res.sessionOtp ? `OTP Sent! Verification code: ${res.sessionOtp}` : (res.message || 'Verification OTP code dispatched!'), 'success');
+      showToast(res.message || 'Verification code dispatched to your email!', 'success');
       setCountdown(60);
       setOtpCode('');
       setResetError('');
@@ -221,7 +221,6 @@ export default function CustomerModal() {
       setResetDone(false);
       setAuthModalTab('verify-otp');
     } else {
-
       if (res.notRegistered) {
         setIsUnregistered(true);
       }
@@ -231,7 +230,7 @@ export default function CustomerModal() {
 
   // Resend OTP
   const handleResendOtp = async () => {
-    if (countdown > 0) return;
+    if (countdown > 0 || loading) return;
     setResetError('');
     setResetSuccess('');
     const target = resetState?.identifier || forgotIdentifier.trim();
@@ -239,7 +238,7 @@ export default function CustomerModal() {
 
     const res = await sendResetOtp(target);
     if (res.success) {
-      showToast('A new OTP verification code has been sent!', 'success');
+      showToast('A new OTP code has been dispatched! Please check your latest email.', 'success');
       setCountdown(60);
     } else {
       setResetError(res.error || 'Failed to resend OTP.');
@@ -795,58 +794,13 @@ export default function CustomerModal() {
                     </button>
                   </div>
                   <p className="text-xs text-slate-300 mt-0.5">
-                    A 6-digit OTP was sent to <strong className="text-white font-mono">{resetState?.maskedTarget || forgotIdentifier || 'your email/phone'}</strong>
+                    A 6-digit OTP has been sent to <strong className="text-white font-mono">{resetState?.maskedTarget || forgotIdentifier || 'your email'}</strong>.
+                  </p>
+                  <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                    Please check your inbox (and spam/junk folder). If you requested multiple codes, enter the one from the <strong className="text-slate-200">most recent email</strong>.
                   </p>
                 </div>
               </div>
-
-              {/* Prominent Verification OTP Card */}
-              {resetState?.sessionOtp && (
-                <div className="p-3.5 bg-gradient-to-r from-amber-500/10 via-slate-900 to-amber-500/10 rounded-2xl border border-[#C5A880]/40 text-xs shadow-lg space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-mono text-[#C5A880] uppercase tracking-wider flex items-center gap-1.5 font-bold">
-                      <Sparkles className="w-3.5 h-3.5 text-[#C5A880] animate-pulse" />
-                      Generated Verification OTP
-                    </span>
-                    <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-500/30">
-                      Active (10m)
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between bg-slate-950/80 px-3.5 py-2.5 rounded-xl border border-slate-800">
-                    <span className="text-xl font-mono font-black text-white tracking-[0.35em]">
-                      {resetState.sessionOtp}
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          navigator.clipboard.writeText(resetState.sessionOtp);
-                          showToast('OTP copied to clipboard!', 'success');
-                        }}
-                        className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-1 border border-slate-700 cursor-pointer"
-                      >
-                        <Copy className="w-3.5 h-3.5" />
-                        <span>Copy</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setOtpCode(resetState.sessionOtp);
-                          showToast('OTP code auto-filled!', 'success');
-                        }}
-                        className="px-3 py-1.5 bg-[#C5A880] hover:bg-[#b89b73] text-black rounded-lg text-xs font-bold font-mono uppercase tracking-wider transition-all flex items-center gap-1 shadow-md cursor-pointer"
-                      >
-                        <Check className="w-3.5 h-3.5" />
-                        <span>Auto-fill OTP</span>
-                      </button>
-                    </div>
-                  </div>
-                  <p className="text-[10.5px] text-slate-400">
-                    Dispatched to your registered destination. If email delivery is delayed, click <strong>Auto-fill OTP</strong> to proceed directly.
-                  </p>
-                </div>
-              )}
-
 
               {resetError && (
                 <div className="p-3 bg-red-950/40 border border-red-800/60 rounded-xl text-red-300 text-xs flex items-center gap-2 animate-fadeIn">
