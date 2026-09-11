@@ -52,11 +52,9 @@ export default function AdminLogin() {
         <form className="admin-login-card" onSubmit={handleSubmit}>
           {/* Logo & Branding */}
           <div className="admin-login-logo flex flex-col items-center">
-            <img
-              src="/lunar-logo.jpg"
-              alt="LUNAR - Live Like You Dream"
-              className="h-16 w-auto object-contain mix-blend-screen filter drop-shadow-[0_0_12px_rgba(255,255,255,0.2)] mb-1"
-            />
+            <span className="font-display text-3xl font-extrabold tracking-[0.25em] text-white uppercase drop-shadow-[0_0_16px_rgba(255,255,255,0.22)] mb-2 select-none">
+              SUKAI
+            </span>
             <p className="text-xs font-mono text-[#C5A880] tracking-wider uppercase">Admin Control Panel</p>
           </div>
 

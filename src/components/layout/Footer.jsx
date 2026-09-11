@@ -31,11 +31,9 @@ export default function Footer({ onNavigate, onSelectCategory, onOpenSizeGuide }
           {/* Left Brand Col */}
           <div className="lg:col-span-5 space-y-4">
             <div className="flex items-center">
-              <img
-                src="/lunar-logo.jpg"
-                alt="LUNAR - Live Like You Dream"
-                className="h-16 w-auto object-contain mix-blend-screen filter drop-shadow-[0_0_12px_rgba(255,255,255,0.18)]"
-              />
+              <span className="font-display text-3xl sm:text-4xl font-extrabold tracking-[0.25em] text-white uppercase drop-shadow-[0_0_16px_rgba(255,255,255,0.22)] select-none">
+                SUKAI
+              </span>
             </div>
             <p className="text-slate-400 font-light leading-relaxed max-w-sm">
               Sculptural streetwear t-shirts engineered with 280 to 360 GSM combed cotton, drop-shoulder silhouettes, and reinforced zero-sag collars. Crafted in limited runs.

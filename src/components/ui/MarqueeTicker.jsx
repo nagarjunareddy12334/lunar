@@ -2,13 +2,13 @@ import React from 'react';
 import { Sparkles, Moon, Compass, Shield } from 'lucide-react';
 
 const MARQUEE_ITEMS = [
-  { text: 'AEROSPACE GRADE 5 TITANIUM', icon: Shield },
-  { text: 'LIMITED RUN 01/150 PCS', icon: Sparkles },
-  { text: '580 GSM PORTUGUESE TERRY', icon: Compass },
-  { text: 'SUPERMOON PHASE 04 DROP', icon: Moon },
-  { text: 'ZERO-RUNOFF BOTANICAL MINERAL DYES', icon: Sparkles },
-  { text: 'WEATHERPROOF FIDLOCK HARDWARE', icon: Shield },
-  { text: 'INSURED WORLDWIDE DELIVERY', icon: Compass },
+  { text: 'SUKAI APPAREL // 3D EXHIBITION', icon: Sparkles },
+  { text: '360 GSM RING-SPUN COMBED COTTON', icon: Compass },
+  { text: 'LIMITED DROP 01 // 150 PCS WORLDWIDE', icon: Shield },
+  { text: 'ZERO-SAG 3.2CM REINFORCED COLLAR', icon: Sparkles },
+  { text: 'SCULPTURAL DROP-SHOULDER SILHOUETTE', icon: Moon },
+  { text: 'ANTI-CRACKING PLASTISOL HIGH-DENSITY PRINT', icon: Shield },
+  { text: 'TOKYO × NEW YORK STREETWEAR ATELIER', icon: Compass },
 ];
 
 /**

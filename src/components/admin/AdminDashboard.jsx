@@ -63,7 +63,7 @@ export default function AdminDashboard() {
       <header className="admin-topnav">
         <div className="admin-topnav-brand">
           <Moon size={22} className="text-[#C5A880]" />
-          <h2>LUNAR</h2>
+          <h2>SUKAI</h2>
           <span>Admin Portal</span>
         </div>
 

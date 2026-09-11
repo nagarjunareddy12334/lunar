@@ -11,6 +11,7 @@ import Navbar from './components/layout/Navbar';
 import HeroSection from './components/hero/HeroSection';
 import MarqueeTicker from './components/ui/MarqueeTicker';
 import DropCountdown from './components/hero/DropCountdown';
+import GarmentRack3D from './components/hero/GarmentRack3D';
 import ProductCatalog from './components/products/ProductCatalog';
 
 import BrandStory from './components/brand/BrandStory';
@@ -80,6 +81,12 @@ function Storefront() {
 
         {/* 2. Drop Countdown with Radar Scan */}
         <DropCountdown />
+
+        {/* 2.5. 3D Boutique Garment Rack Showcase */}
+        <GarmentRack3D 
+          onExplore={() => handleNavigate('catalog')}
+          onQuickView={handleOpenQuickView}
+        />
 
         {/* 3. Product Catalog with 3D Tilt Cards & Specular Sheen */}
         <ProductCatalog

@@ -106,13 +106,11 @@ export default function Navbar({ onOpenSearch, onNavigate, onSelectCategory, onG
             }}
             onMouseEnter={playHover}
             className="group flex items-center text-left cursor-pointer transition-transform duration-300 hover:scale-105"
-            aria-label="LUNAR - Live Like You Dream"
+            aria-label="SUKAI"
           >
-            <img
-              src="/lunar-logo.jpg"
-              alt="LUNAR - Live Like You Dream"
-              className="h-11 sm:h-12 md:h-14 w-auto object-contain mix-blend-screen filter drop-shadow-[0_0_12px_rgba(255,255,255,0.18)]"
-            />
+            <span className="font-display text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-[0.25em] text-white uppercase transition-colors duration-300 group-hover:text-[#dfc8a8] drop-shadow-[0_0_16px_rgba(255,255,255,0.22)] select-none">
+              SUKAI
+            </span>
           </button>
         </div>
 
