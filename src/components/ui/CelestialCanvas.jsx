@@ -238,42 +238,52 @@ export default function CelestialCanvas() {
       particles.push(new Particle());
     }
 
-    // Function to trigger a thunderbolt strike
-    const triggerLightning = (targetX = null, targetY = null) => {
-      const colors = ['#00F0FF', '#D4FF00', '#A855F7', '#FFFFFF'];
-      const chosenColor = colors[Math.floor(Math.random() * colors.length)];
+    // Function to trigger a thunderbolt strike (single or multi-bolt cluster)
+    const triggerLightning = (targetX = null, targetY = null, isCluster = false) => {
+      const colors = ['#00F0FF', '#D4FF00', '#FF1F8F', '#A855F7', '#FFFFFF'];
 
-      let startX, startY, endX, endY;
+      const createBolt = (tx, ty) => {
+        const chosenColor = colors[Math.floor(Math.random() * colors.length)];
+        let startX, startY, endX, endY;
 
-      if (targetX !== null && targetY !== null) {
-        startX = targetX + (Math.random() - 0.5) * 180;
-        startY = -10;
-        endX = targetX;
-        endY = targetY;
+        if (tx !== null && ty !== null) {
+          startX = tx + (Math.random() - 0.5) * 240;
+          startY = -10;
+          endX = tx + (Math.random() - 0.5) * 60;
+          endY = ty;
+        } else {
+          startX = Math.random() * width;
+          startY = -10;
+          endX = startX + (Math.random() - 0.5) * width * 0.45;
+          endY = height * (0.55 + Math.random() * 0.45);
+        }
+
+        lightningBolts.push(new LightningBolt(startX, startY, endX, endY, chosenColor));
+        return chosenColor;
+      };
+
+      if (isCluster) {
+        // Multi-bolt electrical storm cluster across the canvas
+        createBolt(targetX, targetY);
+        createBolt(targetX ? targetX - width * 0.28 : width * 0.2, targetY ? targetY * 0.8 : height * 0.7);
+        createBolt(targetX ? targetX + width * 0.28 : width * 0.8, targetY ? targetY * 0.9 : height * 0.65);
+        flashAlpha = 0.55;
+        flashColor = 'rgba(0, 240, 255,';
+
+        // Staggered secondary strike
+        setTimeout(() => {
+          createBolt(null, null);
+          flashAlpha = 0.4;
+        }, 110);
       } else {
-        startX = Math.random() * width;
-        startY = -10;
-        endX = startX + (Math.random() - 0.5) * width * 0.4;
-        endY = height * (0.6 + Math.random() * 0.4);
+        const c = createBolt(targetX, targetY);
+        // Occasional twin bolt for dramatic impact
+        if (Math.random() < 0.45) {
+          createBolt(targetX, targetY);
+        }
+        flashAlpha = 0.35;
+        flashColor = c === '#D4FF00' ? 'rgba(212, 255, 0,' : 'rgba(0, 240, 255,';
       }
-
-      lightningBolts.push(new LightningBolt(startX, startY, endX, endY, chosenColor));
-
-      // Occasional twin bolt for dramatic impact
-      if (Math.random() < 0.4) {
-        lightningBolts.push(
-          new LightningBolt(
-            startX + (Math.random() - 0.5) * 80,
-            startY,
-            endX + (Math.random() - 0.5) * 100,
-            endY + (Math.random() - 0.5) * 60,
-            chosenColor
-          )
-        );
-      }
-
-      flashAlpha = 0.35;
-      flashColor = chosenColor === '#D4FF00' ? 'rgba(212, 255, 0,' : 'rgba(0, 240, 255,';
 
       // Play audio rumble if unmuted
       soundEngine.playThunder();
@@ -290,11 +300,13 @@ export default function CelestialCanvas() {
     };
     scheduleNextThunder();
 
-    // Event listener for manual / UI triggers
+    // Event listener for manual / UI triggers (e.g. from Navbar, Hero button)
     const handleCustomTrigger = (e) => {
       const detail = e.detail;
-      if (detail && detail.x && detail.y) {
-        triggerLightning(detail.x, detail.y);
+      if (detail && detail.cluster) {
+        triggerLightning(detail.x ?? null, detail.y ?? null, true);
+      } else if (detail && detail.x && detail.y) {
+        triggerLightning(detail.x, detail.y, false);
       } else {
         triggerLightning();
       }
