@@ -16,7 +16,7 @@ export default function Footer({ onNavigate, onSelectCategory, onOpenSizeGuide }
       return;
     }
     setSubscribed(true);
-    addToast('Welcome to LUNAR. Use code "LUNARTEE15" for 15% off.', 'success');
+    addToast('Welcome to SUKIA. Use code "SUKIA15" for 15% off.', 'success');
   };
 
   const scrollToTop = () => {
@@ -30,9 +30,12 @@ export default function Footer({ onNavigate, onSelectCategory, onOpenSizeGuide }
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 pb-16 border-b border-slate-800/80">
           {/* Left Brand Col */}
           <div className="lg:col-span-5 space-y-4">
-            <div className="flex items-center">
-              <span className="font-display text-3xl sm:text-4xl font-extrabold tracking-[0.25em] text-white uppercase drop-shadow-[0_0_16px_rgba(255,255,255,0.22)] select-none">
-                SUKAI
+            <div className="flex items-center gap-2">
+              <span className="font-display text-3xl sm:text-4xl font-black tracking-[0.22em] text-white uppercase drop-shadow-[0_0_18px_rgba(212,255,0,0.3)] select-none">
+                SUKIA
+              </span>
+              <span className="px-1.5 py-0.5 rounded-full bg-[#d4ff00] text-black text-[9px] font-black uppercase tracking-wider">
+                FUNK
               </span>
             </div>
             <p className="text-slate-400 font-light leading-relaxed max-w-sm">
@@ -53,7 +56,7 @@ export default function Footer({ onNavigate, onSelectCategory, onOpenSizeGuide }
             <div className="p-6 sm:p-8 rounded-3xl bg-[#10121A] border border-slate-800 space-y-4">
               <div className="flex items-center gap-2 text-[#C5A880] text-xs font-mono tracking-widest uppercase">
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>JOIN THE LUNAR FREQUENCY</span>
+                <span>JOIN THE SUKIA FREQUENCY</span>
               </div>
               <h3 className="text-xl sm:text-2xl font-bold uppercase tracking-tight text-white font-display">
                 Get Drop Notifications & 15% Off Your First Order
@@ -65,7 +68,7 @@ export default function Footer({ onNavigate, onSelectCategory, onOpenSizeGuide }
               {subscribed ? (
                 <div className="flex items-center gap-2 p-3 bg-emerald-950/40 border border-emerald-500/30 rounded-xl text-emerald-300 text-xs font-mono">
                   <CheckCircle2 className="w-4 h-4" />
-                  <span>Subscribed! Use code <strong>LUNARTEE15</strong> at checkout for 15% off.</span>
+                  <span>Subscribed! Use code <strong>SUKIA15</strong> at checkout for 15% off.</span>
                 </div>
               ) : (
                 <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 pt-2">
@@ -236,7 +239,7 @@ export default function Footer({ onNavigate, onSelectCategory, onOpenSizeGuide }
         {/* Bottom Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-slate-500">
           <div>
-            © {new Date().getFullYear()} LUNAR TEES APPAREL INC. ALL RIGHTS RESERVED.
+            © {new Date().getFullYear()} SUKIA STREETWEAR ATELIER. ALL RIGHTS RESERVED.
           </div>
 
           <div className="flex items-center gap-4 sm:gap-6 flex-wrap justify-center sm:justify-end">

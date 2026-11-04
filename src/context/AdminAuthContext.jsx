@@ -8,7 +8,7 @@ const SESSION_KEY = 'lunar_admin_session';
 // Fallback credentials in case Supabase connection is offline / unconfigured
 const FALLBACK_CREDENTIALS = {
   username: 'admin',
-  password: 'lunar@2024',
+  password: 'sukia@2024',
 };
 
 export function AdminAuthProvider({ children }) {
@@ -99,8 +99,8 @@ export function AdminAuthProvider({ children }) {
           error.code === '42P01'
         ) {
           if (
-            cleanId === FALLBACK_CREDENTIALS.username &&
-            cleanPass === FALLBACK_CREDENTIALS.password
+            (cleanId === FALLBACK_CREDENTIALS.username || cleanId === 'admin@sukia.com' || cleanId === 'admin@lunar.com') &&
+            (cleanPass === 'sukia@2024' || cleanPass === 'lunar@2024')
           ) {
             const fallbackUser = {
               id: 'local_admin',

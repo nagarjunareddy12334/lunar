@@ -21,7 +21,7 @@ const COMMUNITY_POSTS = [
   {
     id: 3,
     image: 'https://images.unsplash.com/photo-1581655353564-df123a1eb820?auto=format&fit=crop&w=800&q=80',
-    handle: '@noah.lunar',
+    handle: '@noah.sukia',
     city: 'London',
     piece: 'Void Architecture Heavy Tee (340 GSM)',
   },
@@ -42,15 +42,15 @@ export default function CommunityOrbit() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-14">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[#C5A880] text-xs font-mono tracking-widest uppercase mb-3">
-            <Camera className="w-3.5 h-3.5" />
-            <span>COMMUNITY LOOKBOOK // #LUNARTEES</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#d4ff00]/10 border border-[#d4ff00]/30 text-[#d4ff00] text-xs font-mono tracking-widest uppercase mb-3">
+            <Camera className="w-3.5 h-3.5 text-[#d4ff00]" />
+            <span>COMMUNITY LOOKBOOK // #SUKIATEES</span>
           </div>
           <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-white font-display mb-4">
-            STYLED BY <span className="shimmer-text">THE COMMUNITY</span>
+            STYLED BY <span className="shimmer-funky">THE SUKIA COMMUNITY</span>
           </h2>
           <p className="text-slate-400 text-sm sm:text-base font-light">
-            Tag @lunar.tees on Instagram with #LunarTees to be featured in our global streetwear styling lookbook.
+            Tag @sukia.tees on Instagram with #SukiaTees to be featured in our global funky streetwear styling lookbook.
           </p>
         </div>
 

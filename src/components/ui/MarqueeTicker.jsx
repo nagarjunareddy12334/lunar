@@ -1,18 +1,19 @@
 import React from 'react';
-import { Sparkles, Moon, Compass, Shield } from 'lucide-react';
+import { Sparkles, Zap, Flame, Radio, Disc } from 'lucide-react';
 
 const MARQUEE_ITEMS = [
-  { text: 'SUKAI APPAREL // 3D EXHIBITION', icon: Sparkles },
-  { text: '360 GSM RING-SPUN COMBED COTTON', icon: Compass },
-  { text: 'LIMITED DROP 01 // 150 PCS WORLDWIDE', icon: Shield },
-  { text: 'ZERO-SAG 3.2CM REINFORCED COLLAR', icon: Sparkles },
-  { text: 'SCULPTURAL DROP-SHOULDER SILHOUETTE', icon: Moon },
-  { text: 'ANTI-CRACKING PLASTISOL HIGH-DENSITY PRINT', icon: Shield },
-  { text: 'TOKYO × NEW YORK STREETWEAR ATELIER', icon: Compass },
+  { text: 'SUKIA FUNK COUTURE // 3D EXHIBITION', icon: Sparkles, color: 'text-[#d4ff00]' },
+  { text: '360 GSM RING-SPUN COMBED GROOVE', icon: Zap, color: 'text-[#ff1f8f]' },
+  { text: 'LIMITED DROP 01 // 150 PCS WORLDWIDE', icon: Disc, color: 'text-[#00f0ff]' },
+  { text: 'ZERO-SAG 3.2CM REINFORCED RIBS', icon: Sparkles, color: 'text-[#d4ff00]' },
+  { text: 'SCULPTURAL BOXY DROP-SHOULDER CUTS', icon: Radio, color: 'text-[#a855f7]' },
+  { text: 'ANTI-CRACK HIGH-DENSITY PLASTISOL', icon: Flame, color: 'text-[#ff6b00]' },
+  { text: 'TOKYO × BERLIN × LA STREETWEAR ATELIER', icon: Zap, color: 'text-[#d4ff00]' },
+  { text: 'NEVER NOT FUNKY // 100% ORGANIC COTTON', icon: Sparkles, color: 'text-[#ff1f8f]' },
 ];
 
 /**
- * High-Fashion Infinite Runway Typography Ticker
+ * High-Fashion Funky Infinite Runway Typography Ticker
  * Seamless scrolling marquee with hover pause and edge gradient masks.
  */
 export default function MarqueeTicker({ reverse = false, speed = 30 }) {
@@ -35,11 +36,11 @@ export default function MarqueeTicker({ reverse = false, speed = 30 }) {
           return (
             <div
               key={idx}
-              className="inline-flex items-center gap-3 text-xs font-mono uppercase tracking-[0.25em] text-slate-400 select-none group-hover:text-slate-200 transition-colors"
+              className="inline-flex items-center gap-3 text-xs font-mono uppercase tracking-[0.25em] text-slate-300 select-none group-hover:text-white transition-colors"
             >
-              <IconComp className="w-3.5 h-3.5 text-[#C5A880] shrink-0" />
-              <span>{item.text}</span>
-              <span className="text-slate-700 mx-2">•</span>
+              <IconComp className={`w-3.5 h-3.5 ${item.color} shrink-0 animate-pulse`} />
+              <span className="font-semibold">{item.text}</span>
+              <span className="text-[#d4ff00]/40 mx-2">★</span>
             </div>
           );
         })}

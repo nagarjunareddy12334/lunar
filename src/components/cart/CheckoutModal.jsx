@@ -36,9 +36,9 @@ export default function CheckoutModal({ isOpen, onClose }) {
   const [formData, setFormData] = useState({
     firstName: 'Alex',
     lastName: 'Vanguard',
-    email: 'alex.vanguard@lunar.com',
+    email: 'alex.vanguard@sukia.com',
     phone: '+1 (555) 019-2834',
-    address: '42 Lunar Boulevard, Suite 800',
+    address: '42 Sukia Boulevard, Suite 800',
     city: 'San Francisco',
     state: 'CA',
     postalCode: '94107',
@@ -190,7 +190,7 @@ export default function CheckoutModal({ isOpen, onClose }) {
               <Lock className="w-4 h-4 text-[#C5A880]" />
             </div>
             <span className="text-xs font-mono tracking-widest text-slate-300 uppercase">
-              256-BIT ENCRYPTED LUNAR CHECKOUT
+              256-BIT ENCRYPTED SUKIA CHECKOUT
             </span>
           </div>
 
@@ -209,7 +209,7 @@ export default function CheckoutModal({ isOpen, onClose }) {
           <div className="mt-4 p-3 bg-slate-900/90 rounded-2xl border border-slate-800 flex items-center justify-between gap-3 text-xs">
             <div className="flex items-center gap-2 text-slate-300">
               <User className="w-4 h-4 text-[#C5A880]" />
-              <span>Have a Lunar customer account?</span>
+              <span>Have a Sukia customer account?</span>
             </div>
             <button
               type="button"
@@ -353,7 +353,7 @@ export default function CheckoutModal({ isOpen, onClose }) {
                   onChange={(e) => setSaveAddressToAccount(e.target.checked)}
                   className="w-4 h-4 rounded bg-slate-900 border-slate-700 text-[#C5A880] focus:ring-0 cursor-pointer"
                 />
-                <span>Save/update this delivery address in my Lunar customer profile</span>
+                <span>Save/update this delivery address in my Sukia customer profile</span>
               </label>
             )}
 
@@ -570,8 +570,8 @@ export default function CheckoutModal({ isOpen, onClose }) {
             </div>
 
             <div>
-              <span className="text-xs font-mono uppercase text-[#C5A880] tracking-widest block mb-1">
-                LUNAR TRANSACTION RECORDED IN SUPABASE
+              <span className="text-xs font-mono uppercase text-[#d4ff00] tracking-widest block mb-1">
+                SUKIA TRANSACTION RECORDED IN SUPABASE
               </span>
               <h3 className="text-2xl sm:text-3xl font-extrabold uppercase tracking-tight text-white font-display">
                 Thank You, {formData.firstName}
@@ -586,7 +586,7 @@ export default function CheckoutModal({ isOpen, onClose }) {
             <div className="bg-[#0D0E14] p-5 rounded-2xl border border-slate-800 max-w-md mx-auto text-left space-y-3 font-mono text-xs">
               <div className="flex justify-between border-b border-slate-800 pb-2">
                 <span className="text-slate-400">TRACKING IDENTIFIER</span>
-                <span className="font-bold text-[#C5A880]">{confirmedOrder?.orderNumber || 'LN-ORBIT'}</span>
+                <span className="font-bold text-[#d4ff00]">{confirmedOrder?.orderNumber || 'SK-FUNK'}</span>
               </div>
               <div className="flex justify-between border-b border-slate-800 pb-2">
                 <span className="text-slate-400">PAYMENT METHOD</span>

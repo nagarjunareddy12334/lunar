@@ -33,10 +33,10 @@ export default function BrandStory() {
             <span>MATERIALS & CRAFTSMANSHIP</span>
           </div>
           <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-white font-display mb-4">
-            ENGINEERED FOR <span className="shimmer-text">ORBIT</span>
+            ENGINEERED FOR <span className="shimmer-funky">THE GROOVE</span>
           </h2>
           <p className="text-slate-400 text-sm sm:text-base font-light leading-relaxed">
-            Every LUNAR piece exists at the intersection of haute couture tailoring and functional aerospace material engineering. We reject mass production in favor of meticulous limited runs.
+            Every SUKIA piece exists at the intersection of haute couture tailoring, psychedelic streetwear graphics, and functional heavy cotton engineering. We reject mass production in favor of meticulous limited runs.
           </p>
         </div>
 
@@ -59,7 +59,7 @@ export default function BrandStory() {
               >
                 <img
                   src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1200&q=85"
-                  alt="LUNAR Material Craftsmanship"
+                  alt="SUKIA Material Craftsmanship"
                   className="w-full h-full object-cover transition-all duration-1000 ease-out"
                   style={{
                     filter: isColorized
@@ -127,7 +127,7 @@ export default function BrandStory() {
                 The 0.01% Standard
               </h3>
               <p className="text-slate-300 text-sm sm:text-base font-light leading-relaxed">
-                Conventional fashion builds for single seasons. LUNAR builds silhouettes designed to withstand extreme metropolitan climates while maintaining a razor-sharp profile.
+                Conventional fashion builds for single seasons. SUKIA builds silhouettes designed to withstand extreme metropolitan wear while maintaining an unapologetic funky profile.
               </p>
             </div>
 

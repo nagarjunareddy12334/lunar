@@ -110,9 +110,9 @@ export default function CustomCursor() {
         ref={dotRef}
         className={`fixed top-0 left-0 -translate-x-1/2 -translate-y-1/2 rounded-full transition-[width,height,background-color,opacity] duration-150 ease-out z-50 ${
           cursorMode === 'view' || cursorMode === 'orbit'
-            ? 'w-2 h-2 bg-[#C5A880] opacity-0'
+            ? 'w-2 h-2 bg-[#d4ff00] opacity-0'
             : cursorMode === 'hover'
-            ? 'w-1.5 h-1.5 bg-[#C5A880]'
+            ? 'w-2 h-2 bg-[#d4ff00] shadow-[0_0_10px_#d4ff00]'
             : 'w-1.5 h-1.5 bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]'
         }`}
         style={{ willChange: 'transform' }}
@@ -123,18 +123,18 @@ export default function CustomCursor() {
         ref={ringRef}
         className={`fixed top-0 left-0 -translate-x-1/2 -translate-y-1/2 rounded-full flex items-center justify-center transition-[width,height,border-color,background-color,transform] duration-200 ease-out backdrop-blur-[1px] ${
           cursorMode === 'view'
-            ? 'w-20 h-20 bg-[#C5A880]/20 border border-[#C5A880] shadow-[0_0_30px_rgba(197,168,128,0.3)]'
+            ? 'w-20 h-20 bg-[#ff1f8f]/20 border border-[#ff1f8f] shadow-[0_0_30px_rgba(255,31,143,0.4)]'
             : cursorMode === 'orbit'
-            ? 'w-24 h-24 bg-slate-900/60 border border-slate-400/80 shadow-[0_0_25px_rgba(255,255,255,0.2)]'
+            ? 'w-24 h-24 bg-slate-900/60 border border-[#d4ff00]/80 shadow-[0_0_25px_rgba(212,255,0,0.3)]'
             : cursorMode === 'hover'
-            ? 'w-10 h-10 border border-[#C5A880]/60 bg-[#C5A880]/10 scale-110'
+            ? 'w-10 h-10 border border-[#d4ff00] bg-[#d4ff00]/10 shadow-[0_0_15px_rgba(212,255,0,0.35)] scale-110'
             : 'w-8 h-8 border border-white/25 bg-white/[0.02]'
         }`}
         style={{ willChange: 'transform' }}
       >
         {/* Dynamic Context Label (e.g., VIEW / ORBIT / DRAG) */}
         {cursorText && (
-          <span className="text-[9px] font-mono font-bold tracking-widest text-[#C5A880] uppercase animate-fadeIn">
+          <span className="text-[9px] font-mono font-bold tracking-widest text-[#d4ff00] uppercase animate-fadeIn">
             {cursorText}
           </span>
         )}

@@ -183,7 +183,7 @@ export default function CartDrawer({ onOpenCheckout }) {
                   <form onSubmit={handleApplyCode} className="flex gap-2">
                     <input
                       type="text"
-                      placeholder="Promo Code (e.g. LUNAR15)"
+                      placeholder="Promo Code (e.g. SUKIA15)"
                       value={promoInput}
                       onChange={(e) => setPromoInput(e.target.value)}
                       className="flex-1 bg-slate-900 border border-slate-800 focus:border-slate-600 px-3 py-2 text-xs font-mono uppercase text-white placeholder-slate-500 rounded-xl outline-none"

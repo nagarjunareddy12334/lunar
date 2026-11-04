@@ -24,9 +24,10 @@ function createFullShirtTexture(colorway) {
     ctx.fillRect(0, y, 2048, 2);
   }
 
-  // White text for SUKAI branding
+  // White text for SUKIA branding
   const whiteTextColor = '#FFFFFF';
-  const accentColor = '#C5A880';
+  const accentColor = colorway.accentColor || '#D4FF00';
+  const secondaryAccent = '#FF1F8F';
 
   // --- Front Chest Graphic (UV mapped area around center-left: X ~680, Y ~880) ---
   ctx.save();
@@ -64,7 +65,7 @@ function createFullShirtTexture(colorway) {
   ctx.fillStyle = accentColor;
   ctx.font = 'bold 24px "Space Grotesk", sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('アヴァンギャルド // 2026', 0, -110);
+  ctx.fillText('★ SUKIA FUNK ATELIER // 2026 ★', 0, -110);
 
   // Center Bold Brand Wordmark in PURE WHITE LETTERS
   ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
@@ -72,12 +73,14 @@ function createFullShirtTexture(colorway) {
   ctx.fillStyle = whiteTextColor;
   ctx.font = '900 110px "Space Grotesk", sans-serif';
   ctx.letterSpacing = '12px';
-  ctx.fillText('SUKAI', 0, -10);
+  ctx.fillText('SUKIA', 0, -10);
   ctx.shadowBlur = 0; // reset shadow
 
   // Horizontal Accent Bar
   ctx.fillStyle = accentColor;
-  ctx.fillRect(-140, 35, 280, 4);
+  ctx.fillRect(-150, 35, 140, 6);
+  ctx.fillStyle = secondaryAccent;
+  ctx.fillRect(-5, 35, 155, 6);
 
   // Coordinates & Heavyweight Specs in Crisp White
   ctx.fillStyle = whiteTextColor;
@@ -88,7 +91,7 @@ function createFullShirtTexture(colorway) {
   ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
   ctx.font = 'bold 18px "Space Grotesk", sans-serif';
   ctx.letterSpacing = '4px';
-  ctx.fillText('HEAVYWEIGHT 360 GSM', 0, 135);
+  ctx.fillText('PSYCHEDELIC HEAVYWEIGHT 360 GSM', 0, 135);
 
   ctx.restore();
 
@@ -109,7 +112,7 @@ function createFullShirtTexture(colorway) {
   ctx.fillStyle = accentColor;
   ctx.font = 'bold 24px "Courier New", monospace';
   ctx.textAlign = 'center';
-  ctx.fillText('SUKAI DROP 01 // 150 PCS WORLDWIDE', 0, -200);
+  ctx.fillText('SUKIA DROP 01 // 150 PCS WORLDWIDE', 0, -200);
 
   // Big Bold White Back Text
   ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
@@ -117,9 +120,9 @@ function createFullShirtTexture(colorway) {
   ctx.fillStyle = whiteTextColor;
   ctx.font = '900 100px "Space Grotesk", sans-serif';
   ctx.letterSpacing = '8px';
-  ctx.fillText('SUKAI', 0, -100);
-  ctx.fillText('LIVE LIKE', 0, -10);
-  ctx.fillText('YOU DREAM', 0, 80);
+  ctx.fillText('SUKIA', 0, -100);
+  ctx.fillText('NEVER NOT', 0, -10);
+  ctx.fillText('GROOVY', 0, 80);
   ctx.shadowBlur = 0;
 
   // Gold Divider
@@ -129,14 +132,14 @@ function createFullShirtTexture(colorway) {
   ctx.fillStyle = whiteTextColor;
   ctx.font = '600 24px "Plus Jakarta Sans", sans-serif';
   ctx.fillText('ZERO-SAG COLLAR ATELIER', 0, 170);
-  ctx.fillText('TOKYO × NEW YORK', 0, 210);
+  ctx.fillText('TOKYO × BERLIN × LA', 0, 210);
 
   ctx.strokeStyle = 'rgba(197, 168, 128, 0.6)';
   ctx.lineWidth = 3;
   ctx.strokeRect(-200, 245, 400, 55);
   ctx.fillStyle = accentColor;
   ctx.font = 'bold 18px monospace';
-  ctx.fillText('LIMITED EDITION: 049 / 150', 0, 280);
+  ctx.fillText('LIMITED FUNK EDITION: 049 / 150', 0, 280);
 
   ctx.restore();
 

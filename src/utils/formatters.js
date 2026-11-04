@@ -1,5 +1,7 @@
 export const VALID_PROMO_CODES = {
-  LUNAR15: { discountPercent: 15, label: '15% Off Lunar Welcome' },
+  SUKIA15: { discountPercent: 15, label: '15% Off Sukia Funk Drop' },
+  SUKIAFUNK: { discountPercent: 20, label: '20% Off Sukia Groove Club' },
+  LUNAR15: { discountPercent: 15, label: '15% Off Sukia Welcome' },
   ECLIPSE20: { discountPercent: 20, label: '20% Off VIP Eclipse Drop' },
   VIP10: { discountPercent: 10, label: '10% Off Member Access' },
 };

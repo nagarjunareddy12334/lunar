@@ -365,9 +365,9 @@ export default function CustomerModal() {
     if (type === 'phone') {
       setLoginIdentifier('+1 (555) 019-2834');
     } else {
-      setLoginIdentifier('alex.vanguard@lunar.com');
+      setLoginIdentifier('alex.vanguard@sukia.com');
     }
-    setLoginPassword('lunar@123');
+    setLoginPassword('sukia@123');
     setLoginError('');
   };
 
@@ -385,7 +385,7 @@ export default function CustomerModal() {
             </div>
             <div>
               <h2 className="text-base font-bold uppercase tracking-wider text-white font-display">
-                {isAuthenticated ? `Welcome, ${customer?.fullName || 'Customer'}` : 'Lunar Customer Portal'}
+                {isAuthenticated ? `Welcome, ${customer?.fullName || 'Customer'}` : 'Sukia Customer Portal'}
               </h2>
               <div className="flex items-center gap-2 mt-0.5">
                 <span className="text-[11px] font-mono tracking-wider text-[#C5A880] uppercase">
@@ -604,7 +604,7 @@ export default function CustomerModal() {
                     onClick={() => fillDemoLogin('email')}
                     className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 rounded-lg text-[11px] font-mono text-slate-300 border border-slate-700 cursor-pointer"
                   >
-                    📧 alex.vanguard@lunar.com
+                    📧 alex.vanguard@sukia.com
                   </button>
                   <button
                     type="button"
@@ -719,7 +719,7 @@ export default function CustomerModal() {
                     type="text"
                     required
                     autoFocus
-                    placeholder="e.g. alex.vanguard@lunar.com or +1 555 019 2834"
+                    placeholder="e.g. alex.vanguard@sukia.com or +1 555 019 2834"
                     value={forgotIdentifier}
                     onChange={(e) => {
                       setForgotIdentifier(e.target.value);
@@ -1135,7 +1135,7 @@ export default function CustomerModal() {
                   </label>
                   <input
                     type="text"
-                    placeholder="42 Lunar Boulevard, Suite 800"
+                    placeholder="42 Sukia Boulevard, Suite 800"
                     value={regForm.address}
                     onChange={(e) => setRegForm({ ...regForm, address: e.target.value })}
                     className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white outline-none focus:border-[#C5A880]"
@@ -1271,7 +1271,7 @@ export default function CustomerModal() {
                   </label>
                   <input
                     type="text"
-                    placeholder="42 Lunar Boulevard, Suite 800"
+                    placeholder="42 Sukia Boulevard, Suite 800"
                     value={profileForm.address}
                     onChange={(e) => setProfileForm({ ...profileForm, address: e.target.value })}
                     className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white outline-none focus:border-[#C5A880]"

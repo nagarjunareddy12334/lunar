@@ -48,13 +48,13 @@ export default function DropCountdown() {
 
     // Trigger celebratory stardust confetti
     confetti({
-      particleCount: 70,
-      spread: 60,
+      particleCount: 90,
+      spread: 70,
       origin: { y: 0.65 },
-      colors: ['#c5a880', '#e2e8f0', '#ffffff'],
+      colors: ['#d4ff00', '#ff1f8f', '#00f0ff', '#ffffff'],
     });
 
-    addToast('VIP Early Access Confirmed! Use code "VIP10" for 10% off your order.', 'success');
+    addToast('VIP Funk Early Access Confirmed! Use code "SUKIA15" for 15% off.', 'success');
   };
 
   return (
@@ -65,12 +65,12 @@ export default function DropCountdown() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             {/* Left Content */}
             <div className="lg:col-span-7">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-mono tracking-widest uppercase mb-4">
-                <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
-                <span>NEXT LIMITED T-SHIRT DROP</span>
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#d4ff00]/10 border border-[#d4ff00]/30 text-[#d4ff00] text-xs font-mono tracking-widest uppercase mb-4">
+                <span className="w-2 h-2 rounded-full bg-[#d4ff00] animate-ping"></span>
+                <span>NEXT SUKIA LIMITED DROP</span>
               </div>
               <h2 className="text-3xl sm:text-4xl font-extrabold uppercase tracking-tight text-white font-display mb-3">
-                PHASE 05: <span className="shimmer-text">CYBER SUPERMOON</span>
+                PHASE 02: <span className="shimmer-funky">PSYCHEDELIC ACID</span>
               </h2>
               <p className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-xl mb-6 font-light">
                 Strictly limited to 150 serialized 340 GSM graphic tees. Hand-finished with holographic foil transfers and numbered atelier badges. Sign up for 15-minute priority access before the public release.

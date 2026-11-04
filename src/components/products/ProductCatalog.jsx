@@ -100,12 +100,12 @@ export default function ProductCatalog({
     <section id="catalog" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto relative">
       {/* Header Title */}
       <div className="text-center max-w-3xl mx-auto mb-12">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/5 border border-white/10 text-[#C5A880] text-xs font-mono tracking-widest uppercase mb-3">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>AUTUMN / WINTER 2026 HEAVYWEIGHT SERIES</span>
+        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#d4ff00]/10 border border-[#d4ff00]/30 text-[#d4ff00] text-xs font-mono tracking-widest uppercase mb-3">
+          <Sparkles className="w-3.5 h-3.5 text-[#d4ff00]" />
+          <span>SUKIA 2026 PSYCHEDELIC HEAVYWEIGHT DROP</span>
         </div>
         <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-white font-display mb-4">
-          THE T-SHIRT <span className="shimmer-text">CATALOG</span>
+          THE SUKIA <span className="shimmer-funky">STREETWEAR CATALOG</span>
         </h2>
         <p className="text-slate-400 text-sm sm:text-base font-light">
           Sculpted boxy & oversized silhouettes crafted from 280 to 360 GSM combed cotton. Click on any tee to view full technical specifications, sizing breakdown, and angle galleries.

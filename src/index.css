@@ -21,6 +21,11 @@
   --color-lunar-gold-light: #dfc8a8;
   --color-lunar-chrome: #e2e8f0;
   --color-lunar-glow: rgba(226, 232, 240, 0.15);
+  --color-funk-lime: #d4ff00;
+  --color-funk-pink: #ff1f8f;
+  --color-funk-purple: #a855f7;
+  --color-funk-cyan: #00f0ff;
+  --color-funk-orange: #ff6b00;
 }
 
 /* Custom Base Styles */
@@ -115,6 +120,60 @@ h1, h2, h3, h4, h5, h6 {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: textShimmer 6s linear infinite;
+}
+
+/* Vibrant Funky Chromatic Shimmer */
+.shimmer-funky {
+  background: linear-gradient(
+    115deg,
+    #ffffff 0%,
+    #d4ff00 25%,
+    #ff1f8f 50%,
+    #00f0ff 75%,
+    #ffffff 100%
+  );
+  background-size: 250% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: textShimmer 4s ease-in-out infinite alternate;
+}
+
+.funk-badge {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 9999px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.funk-badge:hover {
+  transform: translateY(-2px) rotate(-1.5deg) scale(1.04);
+}
+
+.funk-sticker {
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.5);
+}
+
+.funk-sticker:hover {
+  transform: scale(1.08) rotate(0deg) !important;
+  box-shadow: 0 12px 30px -4px rgba(212, 255, 0, 0.25);
+}
+
+.funk-glow-lime {
+  box-shadow: 0 0 25px -4px rgba(212, 255, 0, 0.45);
+}
+
+.funk-glow-pink {
+  box-shadow: 0 0 25px -4px rgba(255, 31, 143, 0.45);
+}
+
+.funk-glow-cyan {
+  box-shadow: 0 0 25px -4px rgba(0, 240, 255, 0.45);
 }
 
 /* Keyframe Animations */

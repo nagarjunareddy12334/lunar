@@ -7,6 +7,7 @@ import { AdminAuthProvider } from './context/AdminAuthContext';
 import { CustomerAuthProvider } from './context/CustomerAuthContext';
 import { ProductProvider } from './context/ProductContext';
 
+import AnnouncementBar from './components/layout/AnnouncementBar';
 import Navbar from './components/layout/Navbar';
 import HeroSection from './components/hero/HeroSection';
 import MarqueeTicker from './components/ui/MarqueeTicker';
@@ -61,6 +62,9 @@ function Storefront() {
 
       {/* Dynamic Stardust & Constellation Celestial Background */}
       <CelestialCanvas />
+
+      {/* Top Rotating Announcement Ticker */}
+      <AnnouncementBar />
 
       {/* Navigation */}
       <Navbar

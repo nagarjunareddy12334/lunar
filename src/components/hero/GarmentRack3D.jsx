@@ -124,12 +124,12 @@ export default function GarmentRack3D({ onExplore, onQuickView }) {
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-[#C5A880]/30 text-[#C5A880] text-[10px] font-mono uppercase tracking-widest mb-3">
-              <Sparkles className="w-3 h-3" />
-              <span>3D BOUTIQUE SHOWCASE</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#d4ff00]/10 border border-[#d4ff00]/30 text-[#d4ff00] text-[10px] font-mono uppercase tracking-widest mb-3">
+              <Sparkles className="w-3 h-3 text-[#d4ff00]" />
+              <span>SUKIA 3D BOUTIQUE SHOWCASE</span>
             </div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight text-white font-display">
-              THE 3D <span className="shimmer-text">GARMENT RACK</span>
+              THE FUNKY <span className="shimmer-funky">GARMENT RACK</span>
             </h2>
             <p className="text-sm sm:text-base text-slate-400 font-light mt-2 max-w-lg">
               Browse hanging silhouettes in 3D perspective. Engineered 280 to 360 GSM heavyweight cotton crafted in numbered editions.

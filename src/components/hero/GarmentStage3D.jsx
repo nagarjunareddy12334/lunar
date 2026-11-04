@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { 
-  RotateCw, 
-  Sparkles, 
-  Eye, 
-  Compass, 
+import {
+  RotateCw,
+  Sparkles,
+  Eye,
+  Compass,
   X,
   Layers,
   Box
@@ -44,10 +44,21 @@ const GARMENT_VARIANTS = [
     id: 'acid',
     name: 'Tokyo Acid',
     colorHex: '#3a443b',
+    accentColor: '#d4ff00',
     gsm: '360 GSM',
     tag: 'LIMITED RUN',
     price: '$82.00',
     originalPrice: '$98.00'
+  },
+  {
+    id: 'funk',
+    name: 'Cosmic Funk Lime',
+    colorHex: '#121a12',
+    accentColor: '#d4ff00',
+    gsm: '360 GSM',
+    tag: '⚡ ULTRA FUNK',
+    price: '$85.00',
+    originalPrice: '$105.00'
   }
 ];
 
@@ -58,7 +69,7 @@ const HOTSPOT_INFO = {
   },
   print: {
     label: 'Plastisol HD Print',
-    spec: 'SUKAI Cybernetic high-density screenprint with anti-crack stretch polymer.'
+    spec: 'SUKIA Cybernetic high-density screenprint with anti-crack stretch polymer.'
   },
   shoulder: {
     label: 'Drop-Shoulder Cut',
@@ -93,7 +104,7 @@ export default function GarmentStage3D({ onExplore }) {
     <div className="relative w-full max-w-xl mx-auto flex flex-col items-center select-none">
       {/* 3D WebGL Stage Container */}
       <div className="relative w-full aspect-[4/5] sm:aspect-[1/1] rounded-3xl overflow-hidden bg-gradient-to-b from-[#141622]/90 via-[#0d0f16]/95 to-[#08090f] border border-slate-700/80 shadow-[0_20px_60px_rgba(0,0,0,0.85)] backdrop-blur-md">
-        
+
         {/* Top Floating Badges */}
         <div className="absolute top-4 left-4 right-4 z-30 flex items-center justify-between pointer-events-none">
           <div className="flex items-center gap-2">
@@ -112,11 +123,10 @@ export default function GarmentStage3D({ onExplore }) {
                 playClick();
                 setIsAutoRotating(!isAutoRotating);
               }}
-              className={`px-3 py-1.5 rounded-full text-[10px] font-mono uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer border ${
-                isAutoRotating 
-                  ? 'bg-[#C5A880] text-black border-[#C5A880] font-bold shadow-[0_0_12px_rgba(197,168,128,0.4)]' 
+              className={`px-3 py-1.5 rounded-full text-[10px] font-mono uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer border ${isAutoRotating
+                  ? 'bg-[#C5A880] text-black border-[#C5A880] font-bold shadow-[0_0_12px_rgba(197,168,128,0.4)]'
                   : 'bg-black/60 text-slate-400 hover:text-white border-white/10 hover:border-white/30'
-              }`}
+                }`}
               title="Toggle Auto 360° Rotation"
             >
               <RotateCw className={`w-3 h-3 ${isAutoRotating ? 'animate-spin' : ''}`} />
@@ -126,7 +136,7 @@ export default function GarmentStage3D({ onExplore }) {
         </div>
 
         {/* Ambient Studio Lighting Glow */}
-        <div 
+        <div
           className="absolute inset-0 pointer-events-none transition-opacity duration-300"
           style={{
             background: `radial-gradient(circle at ${50 + Math.sin(rotationRad) * 25}% 40%, rgba(197, 168, 128, 0.2) 0%, rgba(20, 25, 45, 0.08) 50%, transparent 80%)`
@@ -169,11 +179,10 @@ export default function GarmentStage3D({ onExplore }) {
                     setActiveHotspot(isSelected ? null : { id: spot.id, ...info });
                   }}
                   onMouseEnter={playHover}
-                  className={`group relative flex items-center justify-center w-6 h-6 rounded-full cursor-pointer transition-all duration-300 ${
-                    isSelected 
-                      ? 'bg-[#C5A880] text-black scale-125 shadow-[0_0_18px_rgba(197,168,128,0.9)]' 
+                  className={`group relative flex items-center justify-center w-6 h-6 rounded-full cursor-pointer transition-all duration-300 ${isSelected
+                      ? 'bg-[#C5A880] text-black scale-125 shadow-[0_0_18px_rgba(197,168,128,0.9)]'
                       : 'bg-black/80 hover:bg-[#C5A880] text-[#C5A880] hover:text-black border border-[#C5A880]/60 shadow-md'
-                  }`}
+                    }`}
                   aria-label={info.label}
                 >
                   <span className="absolute -inset-1 rounded-full bg-[#C5A880]/30 animate-ping pointer-events-none" />
@@ -186,7 +195,7 @@ export default function GarmentStage3D({ onExplore }) {
 
         {/* Hotspot Info Card */}
         {activeHotspot && (
-          <div 
+          <div
             className="absolute bottom-16 left-4 right-4 z-40 p-4 rounded-2xl bg-[#0f1118]/95 border border-[#C5A880]/50 shadow-2xl backdrop-blur-xl animate-fadeIn"
             onClick={(e) => e.stopPropagation()}
           >
@@ -245,13 +254,12 @@ export default function GarmentStage3D({ onExplore }) {
                   setActiveVariant(variant);
                 }}
                 onMouseEnter={playHover}
-                className={`group relative flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all cursor-pointer ${
-                  isSelected
+                className={`group relative flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all cursor-pointer ${isSelected
                     ? 'bg-white/10 border-[#C5A880] text-white shadow-[0_0_12px_rgba(197,168,128,0.2)]'
                     : 'bg-transparent border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
-                }`}
+                  }`}
               >
-                <span 
+                <span
                   className="w-3.5 h-3.5 rounded-full border border-white/20 shadow-sm"
                   style={{ backgroundColor: variant.colorHex }}
                 />

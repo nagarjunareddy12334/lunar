@@ -47,8 +47,8 @@ export default function CelestialCanvas() {
         this.baseAlpha = this.alpha;
         this.twinkleSpeed = Math.random() * 0.02 + 0.005;
         this.twinkleOffset = Math.random() * Math.PI * 2;
-        // Occasional gold stardust
-        this.isGold = Math.random() > 0.85;
+        // Funky chromatic stardust palette
+        this.colorType = Math.random();
       }
 
       update(time) {
@@ -84,9 +84,17 @@ export default function CelestialCanvas() {
       draw() {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        if (this.isGold) {
-          ctx.fillStyle = `rgba(197, 168, 128, ${this.alpha * 0.9})`;
-          ctx.shadowColor = 'rgba(197, 168, 128, 0.5)';
+        if (this.colorType < 0.15) {
+          ctx.fillStyle = `rgba(212, 255, 0, ${this.alpha * 0.95})`;
+          ctx.shadowColor = 'rgba(212, 255, 0, 0.6)';
+          ctx.shadowBlur = 4;
+        } else if (this.colorType < 0.28) {
+          ctx.fillStyle = `rgba(255, 31, 143, ${this.alpha * 0.95})`;
+          ctx.shadowColor = 'rgba(255, 31, 143, 0.6)';
+          ctx.shadowBlur = 4;
+        } else if (this.colorType < 0.40) {
+          ctx.fillStyle = `rgba(0, 240, 255, ${this.alpha * 0.9})`;
+          ctx.shadowColor = 'rgba(0, 240, 255, 0.5)';
           ctx.shadowBlur = 4;
         } else {
           ctx.fillStyle = `rgba(226, 232, 240, ${this.alpha * 0.75})`;

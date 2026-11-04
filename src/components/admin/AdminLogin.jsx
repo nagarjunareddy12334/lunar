@@ -52,10 +52,10 @@ export default function AdminLogin() {
         <form className="admin-login-card" onSubmit={handleSubmit}>
           {/* Logo & Branding */}
           <div className="admin-login-logo flex flex-col items-center">
-            <span className="font-display text-3xl font-extrabold tracking-[0.25em] text-white uppercase drop-shadow-[0_0_16px_rgba(255,255,255,0.22)] mb-2 select-none">
-              SUKAI
+            <span className="font-display text-3xl font-extrabold tracking-[0.25em] text-white uppercase drop-shadow-[0_0_16px_rgba(212,255,0,0.3)] mb-2 select-none">
+              SUKIA
             </span>
-            <p className="text-xs font-mono text-[#C5A880] tracking-wider uppercase">Admin Control Panel</p>
+            <p className="text-xs font-mono text-[#d4ff00] tracking-wider uppercase">Admin Control Panel</p>
           </div>
 
 
@@ -76,7 +76,7 @@ export default function AdminLogin() {
               id="admin-username"
               className={`admin-input ${error ? 'admin-input-error' : ''}`}
               type="text"
-              placeholder="admin or admin@lunar.com"
+              placeholder="admin or admin@sukia.com"
               value={username}
               onChange={(e) => {
                 setUsername(e.target.value);
@@ -151,12 +151,12 @@ export default function AdminLogin() {
               type="button"
               onClick={() => {
                 setUsername('admin');
-                setPassword('lunar@2024');
+                setPassword('sukia@2024');
               }}
               style={{
-                background: 'rgba(197, 168, 128, 0.1)',
-                border: '1px dashed rgba(197, 168, 128, 0.3)',
-                color: '#C5A880',
+                background: 'rgba(212, 255, 0, 0.1)',
+                border: '1px dashed rgba(212, 255, 0, 0.4)',
+                color: '#d4ff00',
                 padding: '0.4rem 0.8rem',
                 borderRadius: '0.5rem',
                 fontSize: '0.72rem',
@@ -166,7 +166,7 @@ export default function AdminLogin() {
               }}
               title="Click to fill default admin login credentials"
             >
-              ⚡ Quick Fill Admin (admin / lunar@2024)
+              ⚡ Quick Fill Admin (admin / sukia@2024)
             </button>
           </div>
 

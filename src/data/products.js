@@ -1,5 +1,5 @@
 export const CATEGORIES = [
-  { id: 'all', name: 'All Tees', count: 10, desc: 'Complete LUNAR T-Shirt Collection' },
+  { id: 'all', name: 'All Tees', count: 10, desc: 'Complete SUKIA Funky Streetwear Collection' },
   { id: 'oversized', name: 'Oversized & Boxy', count: 4, desc: 'Heavyweight Drop-Shoulder Silhouettes' },
   { id: 'graphic', name: 'Graphic & Cyberpunk', count: 3, desc: 'High-Density Screenprinted Artwork' },
   { id: 'vintage', name: 'Acid Wash & Vintage', count: 2, desc: 'Sun-Faded Distressed Mineral Washes' },
@@ -30,7 +30,7 @@ export const PRODUCTS = [
     reviewsCount: 84,
     isNew: true,
     isLimited: false,
-    badge: 'HOT DROP',
+    badge: '⚡ ULTRA FUNK',
     stock: 12,
     images: [
       // Front View
@@ -60,7 +60,7 @@ export const PRODUCTS = [
       'High-density plastisol screenprint on chest and back',
       '3.2cm tight crew collar with reinforced double-needle binding',
       'Pre-shrunk fabric ensuring zero wash shrinkage',
-      'Signature tonal embroidered Lunar orbit insignia on left sleeve'
+      'Signature tonal embroidered SUKIA funk insignia on left sleeve'
     ],
     modelInfo: 'Model is 6\'1" (185cm), 76kg wearing Size Large for an oversized streetwear drape.'
   },
@@ -121,7 +121,7 @@ export const PRODUCTS = [
     reviewsCount: 67,
     isNew: false,
     isLimited: false,
-    badge: 'ACID WASH',
+    badge: '🌀 ACID TRIP',
     stock: 9,
     images: [
       'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=1200&q=85',
@@ -176,7 +176,7 @@ export const PRODUCTS = [
       { name: 'Stealth Black', hex: '#111217', image: 'https://images.unsplash.com/photo-1581655353564-df123a1eb820?auto=format&fit=crop&w=1200&q=85' }
     ],
     sizes: ['XS', 'S', 'M', 'L', 'XL'],
-    description: 'Showcasing a cyberpunk Tokyo lunar observatory blueprint screenprinted across the full back in high-density reflective ink. Minimalist Japanese typography on front left chest.',
+    description: 'Showcasing a cyberpunk Tokyo psychedelic observatory blueprint screenprinted across the full back in high-density reflective ink. Minimalist Japanese typography on front left chest.',
     specs: {
       fabric: '100% Combed Compact Cotton',
       weight: '300 GSM Heavyweight',
@@ -234,7 +234,7 @@ export const PRODUCTS = [
       'Completely opaque fabric (zero transparency in white)',
       'Substantial drape that holds shape in all climates',
       'Pre-shrunk to less than 1% variance',
-      'Custom woven lunar hem label in gold thread'
+      'Custom woven SUKIA funk hem label in gold thread'
     ],
     modelInfo: 'Model is 6\'0" (183cm), 80kg wearing Size Large.'
   },
@@ -320,7 +320,7 @@ export const PRODUCTS = [
       'Reinforced side stay stitches prevent excessive fraying past 3mm',
       'Slightly widened neckline for effortless drape',
       'Garment enzyme washed to prevent any post-purchase shrinkage',
-      'Micro-tonal Lunar branding across center chest'
+      'Micro-tonal SUKIA branding across center chest'
     ],
     modelInfo: 'Model is 5\'11" (180cm) wearing Size Medium.'
   },
@@ -449,7 +449,7 @@ export const PRODUCTS = [
       'Oversized boxy streetwear drape with dropped shoulder seams',
       'Thick neckline collar that never curls or stretches out',
       'Pre-shrunk and color-locked for permanent vibrancy',
-      'Signature minimalist Lunar studio label'
+      'Signature minimalist SUKIA studio label'
     ],
     modelInfo: 'Model is 6\'1" (185cm) wearing Size Large.'
   }

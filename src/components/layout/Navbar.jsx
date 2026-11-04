@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Heart, ShoppingBag, Menu, X, Moon, Sparkles, User, Package } from 'lucide-react';
+import { Search, Heart, ShoppingBag, Menu, X, Moon, Sparkles, User, Package, Volume2, VolumeX, Zap } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import { useCustomerAuth } from '../../context/CustomerAuthContext';
@@ -9,7 +9,7 @@ export default function Navbar({ onOpenSearch, onNavigate, onSelectCategory, onG
   const { setIsCartOpen, totalItemCount } = useCart();
   const { setIsWishlistOpen, wishlistCount } = useWishlist();
   const { customer, isAuthenticated, openAuthModal, orders } = useCustomerAuth();
-  const { playClick, playHover } = useSoundFX();
+  const { playClick, playHover, isMuted, toggleSound } = useSoundFX();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -105,11 +105,14 @@ export default function Navbar({ onOpenSearch, onNavigate, onSelectCategory, onG
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
             onMouseEnter={playHover}
-            className="group flex items-center text-left cursor-pointer transition-transform duration-300 hover:scale-105"
-            aria-label="SUKAI"
+            className="group flex items-center gap-2 text-left cursor-pointer transition-transform duration-300 hover:scale-105"
+            aria-label="SUKIA"
           >
-            <span className="font-display text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-[0.25em] text-white uppercase transition-colors duration-300 group-hover:text-[#dfc8a8] drop-shadow-[0_0_16px_rgba(255,255,255,0.22)] select-none">
-              SUKAI
+            <span className="font-display text-2xl sm:text-3xl md:text-4xl font-black tracking-[0.22em] text-white uppercase transition-all duration-300 group-hover:text-[#d4ff00] drop-shadow-[0_0_18px_rgba(212,255,0,0.35)] select-none">
+              SUKIA
+            </span>
+            <span className="hidden sm:inline-block px-1.5 py-0.5 rounded-full bg-[#d4ff00] text-black text-[9px] font-black tracking-wider uppercase transform -rotate-6 group-hover:rotate-0 transition-transform">
+              FUNK
             </span>
           </button>
         </div>
@@ -117,6 +120,24 @@ export default function Navbar({ onOpenSearch, onNavigate, onSelectCategory, onG
 
         {/* Right Actions */}
         <div className="flex items-center gap-1.5 sm:gap-2.5">
+                    {/* Funky Audio FX Toggle */}
+          <button
+            onClick={() => {
+              toggleSound();
+              playClick();
+            }}
+            onMouseEnter={playHover}
+            className={`p-2 sm:p-2.5 rounded-full transition-all cursor-pointer ${
+              !isMuted
+                ? 'text-[#d4ff00] bg-[#d4ff00]/10 border border-[#d4ff00]/30 shadow-[0_0_12px_rgba(212,255,0,0.25)]'
+                : 'text-slate-400 hover:text-white hover:bg-white/5'
+            }`}
+            aria-label={!isMuted ? 'Mute funky sound FX' : 'Enable funky synth audio'}
+            title={!isMuted ? 'Funky Audio: ON (Click to mute)' : 'Funky Audio: OFF (Click to unmute)'}
+          >
+            {!isMuted ? <Volume2 className="w-4 h-4 sm:w-4.5 sm:h-4.5 animate-pulse text-[#d4ff00]" /> : <VolumeX className="w-4 h-4 sm:w-4.5 sm:h-4.5" />}
+          </button>
+
           {/* Search Button */}
           <button
             onClick={() => {

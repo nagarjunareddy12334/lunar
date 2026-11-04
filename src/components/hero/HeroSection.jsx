@@ -12,7 +12,7 @@ export default function HeroSection({ onExplore, onSelectCategory }) {
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         <img
           src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=2000&q=85"
-          alt="SUKAI Streetwear T-Shirts"
+          alt="SUKIA Streetwear T-Shirts"
           className="w-full h-full object-cover object-top opacity-20 filter grayscale contrast-125 scale-105"
         />
         {/* Gradients to blend sleek dark luxury mood with warm amber studio glow */}
@@ -26,26 +26,37 @@ export default function HeroSection({ onExplore, onSelectCategory }) {
           
           {/* Left Column: Kinetic Typography & CTAs (6 cols) */}
           <div className="lg:col-span-6 text-left">
-            {/* Live Drop Status Pill */}
-            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/5 border border-[#C5A880]/40 text-[#C5A880] text-xs font-mono tracking-widest uppercase mb-6 shadow-lg animate-fadeIn">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#C5A880] opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#C5A880]"></span>
+            {/* Funky Sticker Badges */}
+            <div className="flex flex-wrap items-center gap-2.5 mb-5">
+              <span className="funk-sticker inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#d4ff00] text-black text-[11px] font-black uppercase tracking-wider -rotate-2 hover:rotate-0 transition-transform shadow-[0_0_16px_rgba(212,255,0,0.35)] select-none">
+                <Sparkles className="w-3.5 h-3.5 text-black" />
+                <span>SUKIA FUNK ATELIER</span>
               </span>
-              <span>SUKAI DROP 01 // 3D EXHIBITION</span>
+              <span className="funk-sticker inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#ff1f8f] text-white text-[11px] font-black uppercase tracking-wider rotate-2 hover:rotate-0 transition-transform shadow-[0_0_16px_rgba(255,31,143,0.35)] select-none">
+                <span>⚡ 360 GSM GROOVE</span>
+              </span>
+            </div>
+
+            {/* Live Drop Status Pill */}
+            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/5 border border-[#d4ff00]/40 text-[#d4ff00] text-xs font-mono tracking-widest uppercase mb-6 shadow-lg animate-fadeIn">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#d4ff00] opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#d4ff00]"></span>
+              </span>
+              <span>SUKIA DROP 01 // 3D EXHIBITION</span>
               <span className="text-slate-500">•</span>
               <span className="text-slate-300 font-normal">280–360 GSM</span>
             </div>
 
             {/* Kinetic Shimmer Headline */}
             <h1 className="text-4xl sm:text-6xl md:text-7xl font-black uppercase tracking-tight leading-[0.95] text-white font-display mb-6">
-              THE 3D <br />
-              <span className="shimmer-text">STREETWEAR TEE.</span>
+              THE FUNKIEST <br />
+              <span className="shimmer-funky">STREETWEAR TEE.</span>
             </h1>
 
             {/* Subtitle */}
             <p className="max-w-xl text-base sm:text-lg text-slate-300 font-light leading-relaxed mb-8 text-balance">
-              Engineered boxy silhouettes crafted with dense 280–360 GSM combed cotton. Featuring reinforced zero-sag collars, drop-shoulder architecture, and cybernetic Japanese graphics.
+              High-frequency boxy silhouettes crafted with dense 280–360 GSM Portuguese combed cotton. Featuring reinforced zero-sag collars, drop-shoulder architecture, and psychedelic cybernetic graphics.
             </p>
 
             {/* Action Buttons */}
@@ -55,9 +66,9 @@ export default function HeroSection({ onExplore, onSelectCategory }) {
                   playClick();
                   onExplore();
                 }}
-                className="px-8 py-4 bg-white text-[#090A0F] font-bold text-xs uppercase tracking-[0.2em] rounded-full hover:bg-[#dfc8a8] transition-all shadow-xl shadow-white/10 flex items-center justify-center gap-3 cursor-pointer group"
+                className="px-8 py-4 bg-[#d4ff00] text-black font-extrabold text-xs uppercase tracking-[0.2em] rounded-full hover:bg-white hover:shadow-[0_0_25px_rgba(212,255,0,0.5)] transition-all shadow-xl flex items-center justify-center gap-3 cursor-pointer group transform hover:-translate-y-0.5 active:translate-y-0"
               >
-                <span>Shop The Drop</span>
+                <span>Shop The Funk Drop</span>
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1.5" />
               </button>
 
@@ -67,30 +78,30 @@ export default function HeroSection({ onExplore, onSelectCategory }) {
                   if (onSelectCategory) onSelectCategory('oversized');
                   onExplore();
                 }}
-                className="px-8 py-4 bg-white/5 hover:bg-white/10 text-slate-200 hover:text-white font-semibold text-xs uppercase tracking-[0.2em] rounded-full border border-white/15 hover:border-white/30 transition-all flex items-center justify-center gap-2.5 cursor-pointer group"
+                className="px-8 py-4 bg-white/5 hover:bg-white/10 text-slate-200 hover:text-white font-semibold text-xs uppercase tracking-[0.2em] rounded-full border border-white/15 hover:border-[#ff1f8f]/60 hover:shadow-[0_0_20px_rgba(255,31,143,0.3)] transition-all flex items-center justify-center gap-2.5 cursor-pointer group"
               >
-                <Layers className="w-4 h-4 text-[#C5A880]" />
+                <Layers className="w-4 h-4 text-[#ff1f8f]" />
                 <span>Oversized Fits</span>
               </button>
             </div>
 
             {/* Feature Highlights Spec Bar */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-xl pt-6 border-t border-slate-800/80">
-              <div className="p-3 rounded-xl bg-white/5 border border-slate-800/80 hover:border-slate-600 transition-colors">
+              <div className="p-3 rounded-xl bg-white/5 border border-slate-800/80 hover:border-[#d4ff00]/40 transition-colors">
                 <span className="block text-[10px] font-mono text-slate-400 uppercase tracking-wider">COTTON DENSITY</span>
                 <span className="text-xs font-semibold text-white">280–360 GSM</span>
               </div>
-              <div className="p-3 rounded-xl bg-white/5 border border-slate-800/80 hover:border-slate-600 transition-colors">
+              <div className="p-3 rounded-xl bg-white/5 border border-slate-800/80 hover:border-[#ff1f8f]/40 transition-colors">
                 <span className="block text-[10px] font-mono text-slate-400 uppercase tracking-wider">COLLAR GAUGE</span>
-                <span className="text-xs font-semibold text-white">3.2cm Tight Rib</span>
+                <span className="text-xs font-semibold text-white">3.2cm Zero-Sag</span>
               </div>
               <div className="p-3 rounded-xl bg-white/5 border border-slate-800/80 hover:border-slate-600 transition-colors">
                 <span className="block text-[10px] font-mono text-slate-400 uppercase tracking-wider">SILHOUETTE</span>
-                <span className="text-xs font-semibold text-[#C5A880]">Drop-Shoulder</span>
+                <span className="text-xs font-semibold text-[#d4ff00]">Drop-Shoulder</span>
               </div>
-              <div className="p-3 rounded-xl bg-white/5 border border-slate-800/80 hover:border-slate-600 transition-colors">
-                <span className="block text-[10px] font-mono text-slate-400 uppercase tracking-wider">EDITION</span>
-                <span className="text-xs font-semibold text-white">Limited 150 Pcs</span>
+              <div className="p-3 rounded-xl bg-white/5 border border-slate-800/80 hover:border-[#00f0ff]/40 transition-colors">
+                <span className="block text-[10px] font-mono text-slate-400 uppercase tracking-wider">VIBE CHECK</span>
+                <span className="text-xs font-semibold text-[#00f0ff]">100% Funky</span>
               </div>
             </div>
           </div>

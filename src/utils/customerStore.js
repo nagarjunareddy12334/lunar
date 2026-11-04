@@ -268,15 +268,15 @@ export async function loginCustomer(identifier, password) {
 
   // Demo user fallback check
   if (
-    (cleanEmail === 'alex.vanguard@lunar.com' || cleanDigits.includes('5550192834') || cleanId === '+1 (555) 019-2834') &&
-    cleanPass === 'lunar@123'
+    (cleanEmail === 'alex.vanguard@sukia.com' || cleanEmail === 'alex.vanguard@lunar.com' || cleanDigits.includes('5550192834') || cleanId === '+1 (555) 019-2834') &&
+    (cleanPass === 'sukia@123' || cleanPass === 'lunar@123')
   ) {
     const demoUser = {
       id: 'cust_demo_alex',
-      email: 'alex.vanguard@lunar.com',
+      email: cleanEmail || 'alex.vanguard@sukia.com',
       fullName: 'Alex Vanguard',
       phone: '+1 (555) 019-2834',
-      address: '42 Lunar Boulevard, Suite 800',
+      address: '42 Sukia Boulevard, Suite 800',
       city: 'San Francisco',
       state: 'CA',
       postalCode: '94107',
@@ -372,6 +372,7 @@ export async function checkUserRegistered(identifier) {
 
   // 3. Check Demo User
   if (
+    cleanEmail === 'alex.vanguard@sukia.com' ||
     cleanEmail === 'alex.vanguard@lunar.com' ||
     cleanDigits.includes('5550192834') ||
     cleanId === '+1 (555) 019-2834'
@@ -380,7 +381,7 @@ export async function checkUserRegistered(identifier) {
       registered: true,
       customer: {
         id: 'cust_demo_alex',
-        email: 'alex.vanguard@lunar.com',
+        email: cleanEmail || 'alex.vanguard@sukia.com',
         fullName: 'Alex Vanguard',
         phone: '+1 (555) 019-2834',
       },

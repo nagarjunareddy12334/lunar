@@ -99,7 +99,7 @@ class SoundEngine {
     if (!this.ctx) return;
 
     try {
-      const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6 (Major triad)
+      const notes = [440, 554.37, 659.25, 830.61, 987.77]; // Funky Maj9 Groovy Arpeggio
       notes.forEach((freq, idx) => {
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();

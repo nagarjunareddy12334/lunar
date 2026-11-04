@@ -51,7 +51,7 @@ export default function ProductCard({ product, onQuickView, onSelectProduct }) {
 
   return (
     <div
-      className="group relative flex flex-col h-full rounded-2xl overflow-hidden bg-[#10121A] border border-slate-800/80 hover:border-slate-600 transition-all duration-300 hover:shadow-2xl hover:shadow-black/60 cursor-pointer"
+      className="group relative flex flex-col h-full rounded-2xl overflow-hidden bg-[#10121A] border border-slate-800/80 hover:border-[#d4ff00]/50 transition-all duration-300 hover:shadow-2xl hover:shadow-[#d4ff00]/10 cursor-pointer"
       onMouseEnter={() => {
         setIsHovered(true);
         playHover();
@@ -85,7 +85,7 @@ export default function ProductCard({ product, onQuickView, onSelectProduct }) {
         {/* Top Floating Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10 pointer-events-none">
           {product.badge && (
-            <span className="px-2.5 py-1 rounded-md bg-[#090A0F]/90 backdrop-blur-md text-[10px] font-mono uppercase tracking-wider text-white font-bold border border-white/15 shadow-md">
+            <span className="funk-sticker px-2.5 py-1 rounded-full bg-[#d4ff00] text-black text-[10px] font-mono uppercase tracking-wider font-extrabold border border-black/20 shadow-lg -rotate-2 hover:rotate-0">
               {product.badge}
             </span>
           )}

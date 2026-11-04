@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Sparkles, ShieldCheck } from 'lucide-react';
 
 const ANNOUNCEMENTS = [
-  { text: 'FREE WORLDWIDE EXPRESS SHIPPING ON ALL ORDERS OVER $75', code: null },
-  { text: 'USE CODE "LUNARTEE15" FOR 15% OFF ALL GRAPHIC & OVERSIZED TEES', code: 'LUNARTEE15' },
-  { text: 'NEW 2026 DROP: 280–360 GSM ULTRA-HEAVYWEIGHT TEES NOW LIVE', code: null },
+  { text: 'FREE WORLDWIDE EXPRESS SHIPPING ON ALL SUKIA ORDERS OVER $75', code: null },
+  { text: 'USE CODE "SUKIA15" FOR 15% OFF ALL FUNKY STREETWEAR DROPS', code: 'SUKIA15' },
+  { text: 'NEW 2026 DROP: 280–360 GSM PSYCHEDELIC HEAVYWEIGHT TEES NOW LIVE', code: null },
   { text: 'LIFETIME ZERO-SAG COLLAR GUARANTEE & EASY 30-DAY EXCHANGES', code: null }
 ];
 
@@ -27,11 +27,11 @@ export default function AnnouncementBar() {
 
         {/* Center Rotating Message */}
         <div className="flex-1 flex items-center justify-center gap-2 text-center font-medium tracking-wider text-[11px] sm:text-xs">
-          <Sparkles className="w-3.5 h-3.5 text-[#C5A880] shrink-0" />
-          <span className="transition-all duration-500 font-mono">{current.text}</span>
+          <Sparkles className="w-3.5 h-3.5 text-[#d4ff00] shrink-0 animate-pulse" />
+          <span className="transition-all duration-500 font-mono text-slate-200">{current.text}</span>
           {current.code && (
-            <span className="hidden sm:inline-block bg-white/10 text-[#C5A880] font-mono px-2 py-0.5 rounded text-[10px] border border-white/15">
-              {current.code}
+            <span className="hidden sm:inline-block bg-[#d4ff00]/15 text-[#d4ff00] font-mono font-bold px-2 py-0.5 rounded text-[10px] border border-[#d4ff00]/30 shadow-[0_0_8px_rgba(212,255,0,0.2)]">
+              ⚡ {current.code}
             </span>
           )}
         </div>
