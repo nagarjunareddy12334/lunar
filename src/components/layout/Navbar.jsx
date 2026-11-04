@@ -120,26 +120,7 @@ export default function Navbar({ onOpenSearch, onNavigate, onSelectCategory, onG
 
         {/* Right Actions */}
         <div className="flex items-center gap-1.5 sm:gap-2.5">
-          {/* Funky Interactive Thunder Button */}
-          <button
-            onClick={() => {
-              playClick(1100, 0.05);
-              window.dispatchEvent(
-                new CustomEvent('trigger-thunder', {
-                  detail: { cluster: true, x: window.innerWidth * 0.5, y: 200 }
-                })
-              );
-            }}
-            onMouseEnter={playHover}
-            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#00f0ff]/10 hover:bg-[#00f0ff]/25 text-[#00f0ff] border border-[#00f0ff]/40 shadow-[0_0_12px_rgba(0,240,255,0.25)] hover:shadow-[0_0_20px_rgba(0,240,255,0.5)] transition-all cursor-pointer font-mono font-bold text-[10px] tracking-wider active:scale-95"
-            title="Click to unleash lightning storm"
-            aria-label="Strike thunder"
-          >
-            <Zap className="w-3.5 h-3.5 text-[#00f0ff] animate-pulse" />
-            <span>THUNDER</span>
-          </button>
-
-          {/* Funky Audio FX Toggle */}
+                    {/* Funky Audio FX Toggle */}
           <button
             onClick={() => {
               toggleSound();

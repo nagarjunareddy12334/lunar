@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Heart, Eye, Plus, Star, Check, ArrowUpRight, Sparkles, Zap } from 'lucide-react';
+import { Heart, Eye, Plus, Star, Check, ArrowUpRight, Sparkles } from 'lucide-react';
 import { formatPrice } from '../../utils/formatters';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
@@ -51,7 +51,7 @@ export default function ProductCard({ product, onQuickView, onSelectProduct }) {
 
   return (
     <div
-      className="group relative flex flex-col h-full rounded-2xl overflow-hidden bg-[#10121A] border border-slate-800/80 hover:border-[#00f0ff]/60 electric-card transition-all duration-300 hover:shadow-2xl hover:shadow-[#00f0ff]/15 cursor-pointer"
+      className="group relative flex flex-col h-full rounded-2xl overflow-hidden bg-[#10121A] border border-slate-800/80 hover:border-[#d4ff00]/50 transition-all duration-300 hover:shadow-2xl hover:shadow-[#d4ff00]/10 cursor-pointer"
       onMouseEnter={() => {
         setIsHovered(true);
         playHover();
@@ -198,10 +198,7 @@ export default function ProductCard({ product, onQuickView, onSelectProduct }) {
 
           {/* Product Name */}
           <h3 className="text-sm sm:text-base font-bold text-slate-100 uppercase tracking-tight group-hover:text-white transition-colors line-clamp-1 flex items-center justify-between gap-2">
-            <span className="flex items-center gap-1.5">
-              <span>{product.name}</span>
-              <Zap className="w-3.5 h-3.5 text-[#00f0ff] opacity-0 group-hover:opacity-100 transition-opacity animate-pulse shrink-0" />
-            </span>
+            <span>{product.name}</span>
             <ArrowUpRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 shrink-0" />
           </h3>
 
