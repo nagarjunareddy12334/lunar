@@ -14,6 +14,15 @@ import ThreeTShirtCanvas from './ThreeTShirtCanvas';
 // 3D Garment Colorway Variants
 const GARMENT_VARIANTS = [
   {
+    id: 'charcoal',
+    name: 'Vintage Washed Slate',
+    colorHex: '#3c4048',
+    gsm: '360 GSM',
+    tag: '🦅 ALPHA DROP 01',
+    price: '$78.00',
+    originalPrice: '$95.00'
+  },
+  {
     id: 'noir',
     name: 'Obsidian Noir',
     colorHex: '#0c0d12',
@@ -21,15 +30,6 @@ const GARMENT_VARIANTS = [
     tag: 'SIGNATURE DROP 01',
     price: '$78.00',
     originalPrice: '$95.00'
-  },
-  {
-    id: 'charcoal',
-    name: 'Washed Slate',
-    colorHex: '#252932',
-    gsm: '340 GSM',
-    tag: 'MINIMAL HEAVY',
-    price: '$74.00',
-    originalPrice: '$88.00'
   },
   {
     id: 'bone',
@@ -68,8 +68,8 @@ const HOTSPOT_INFO = {
     spec: '3.2cm Heavy Ribbed Collar with internal herringbone stabilization tape.'
   },
   print: {
-    label: 'Plastisol HD Print',
-    spec: 'SUKIA Cybernetic high-density screenprint with anti-crack stretch polymer.'
+    label: 'Alpha & Lunar HD Print',
+    spec: 'Authentic front cursive Lunar chest wordmark & oversized high-density Alpha Eagle back artwork.'
   },
   shoulder: {
     label: 'Drop-Shoulder Cut',

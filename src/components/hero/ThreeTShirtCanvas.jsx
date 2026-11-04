@@ -3,13 +3,27 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 /**
- * Creates high-resolution graphic texture decal mapped onto the 3D t-shirt UVs
+ * Pre-load custom front ("Lunar" script) and back ("ALPHA" + Eagle) graphics
  */
-function createFullShirtTexture(colorway) {
-  const canvas = document.createElement('canvas');
-  canvas.width = 2048;
-  canvas.height = 2048;
+let frontPrintImg = null;
+let backPrintImg = null;
+
+if (typeof window !== 'undefined') {
+  frontPrintImg = new Image();
+  frontPrintImg.crossOrigin = 'anonymous';
+  frontPrintImg.src = '/custom-prints/lunar-script-hd.png';
+
+  backPrintImg = new Image();
+  backPrintImg.crossOrigin = 'anonymous';
+  backPrintImg.src = '/custom-prints/alpha-eagle-final.png';
+}
+
+/**
+ * Renders the high-definition front & back custom graphics onto the 2048x2048 texture canvas
+ */
+function renderShirtCanvas(canvas, colorway) {
   const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, 2048, 2048);
 
   // Background fabric color base
   ctx.fillStyle = colorway.colorHex;
@@ -24,130 +38,61 @@ function createFullShirtTexture(colorway) {
     ctx.fillRect(0, y, 2048, 2);
   }
 
-  // White text for SUKIA branding
-  const whiteTextColor = '#FFFFFF';
-  const accentColor = colorway.accentColor || '#D4FF00';
-  const secondaryAccent = '#FF1F8F';
-
-  // --- Front Chest Graphic (UV mapped area around center-left: X ~680, Y ~880) ---
+  // --- Front Chest Graphic: "Lunar" Script (UV mapped area around center-left: X ~680, Y ~860) ---
   ctx.save();
-  ctx.translate(680, 880);
+  ctx.translate(680, 860);
 
-  // Subtle contrast backdrop for light shirts
-  if (colorway.id === 'bone') {
-    ctx.fillStyle = 'rgba(15, 17, 23, 0.75)';
-    ctx.beginPath();
-    ctx.roundRect(-260, -200, 520, 420, 24);
-    ctx.fill();
-    ctx.strokeStyle = accentColor;
-    ctx.lineWidth = 3;
-    ctx.stroke();
+  if (frontPrintImg && frontPrintImg.complete && frontPrintImg.naturalWidth > 0) {
+    const fW = 460;
+    const fH = 210;
+    ctx.drawImage(frontPrintImg, -fW / 2, -fH / 2, fW, fH);
+  } else {
+    // Elegant cursive script fallback while loading
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'italic 700 96px "Plus Jakarta Sans", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+    ctx.shadowBlur = 8;
+    ctx.fillText('Lunar', 0, 10);
   }
-
-  // Outer framing box
-  ctx.strokeStyle = accentColor;
-  ctx.lineWidth = 5;
-  ctx.strokeRect(-230, -170, 460, 360);
-
-  // Corner bracket accents
-  ctx.beginPath();
-  ctx.moveTo(-250, -190);
-  ctx.lineTo(-200, -190);
-  ctx.moveTo(200, -190);
-  ctx.lineTo(250, -190);
-  ctx.moveTo(-250, 210);
-  ctx.lineTo(-200, 210);
-  ctx.moveTo(200, 210);
-  ctx.lineTo(250, 210);
-  ctx.stroke();
-
-  // Top Japanese Sub-heading
-  ctx.fillStyle = accentColor;
-  ctx.font = 'bold 24px "Space Grotesk", sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('★ SUKIA FUNK ATELIER // 2026 ★', 0, -110);
-
-  // Center Bold Brand Wordmark in PURE WHITE LETTERS
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
-  ctx.shadowBlur = 10;
-  ctx.fillStyle = whiteTextColor;
-  ctx.font = '900 110px "Space Grotesk", sans-serif';
-  ctx.letterSpacing = '12px';
-  ctx.fillText('SUKIA', 0, -10);
-  ctx.shadowBlur = 0; // reset shadow
-
-  // Horizontal Accent Bar
-  ctx.fillStyle = accentColor;
-  ctx.fillRect(-150, 35, 140, 6);
-  ctx.fillStyle = secondaryAccent;
-  ctx.fillRect(-5, 35, 155, 6);
-
-  // Coordinates & Heavyweight Specs in Crisp White
-  ctx.fillStyle = whiteTextColor;
-  ctx.font = 'bold 22px "Courier New", monospace';
-  ctx.letterSpacing = '2px';
-  ctx.fillText('35.6762° N, 139.6503° E', 0, 95);
-
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-  ctx.font = 'bold 18px "Space Grotesk", sans-serif';
-  ctx.letterSpacing = '4px';
-  ctx.fillText('PSYCHEDELIC HEAVYWEIGHT 360 GSM', 0, 135);
-
   ctx.restore();
 
-  // --- Back Large Statement Graphic (UV mapped area around center-right: X ~1460, Y ~880) ---
+  // --- Back Large Statement Graphic: "ALPHA" + Flying Eagle (UV mapped area around center-right: X ~1460, Y ~880) ---
   ctx.save();
   ctx.translate(1460, 880);
 
-  if (colorway.id === 'bone') {
-    ctx.fillStyle = 'rgba(15, 17, 23, 0.75)';
-    ctx.beginPath();
-    ctx.roundRect(-260, -250, 520, 560, 24);
-    ctx.fill();
-    ctx.strokeStyle = accentColor;
-    ctx.lineWidth = 3;
-    ctx.stroke();
+  if (backPrintImg && backPrintImg.complete && backPrintImg.naturalWidth > 0) {
+    const bW = 720;
+    const bH = 868;
+    ctx.drawImage(backPrintImg, -bW / 2, -bH / 2, bW, bH);
+  } else {
+    // Fallback statement back text
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = '900 110px "Space Grotesk", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+    ctx.shadowBlur = 10;
+    ctx.fillText('ALPHA', 0, -100);
   }
-
-  ctx.fillStyle = accentColor;
-  ctx.font = 'bold 24px "Courier New", monospace';
-  ctx.textAlign = 'center';
-  ctx.fillText('SUKIA DROP 01 // 150 PCS WORLDWIDE', 0, -200);
-
-  // Big Bold White Back Text
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
-  ctx.shadowBlur = 10;
-  ctx.fillStyle = whiteTextColor;
-  ctx.font = '900 100px "Space Grotesk", sans-serif';
-  ctx.letterSpacing = '8px';
-  ctx.fillText('SUKIA', 0, -100);
-  ctx.fillText('NEVER NOT', 0, -10);
-  ctx.fillText('GROOVY', 0, 80);
-  ctx.shadowBlur = 0;
-
-  // Gold Divider
-  ctx.fillStyle = accentColor;
-  ctx.fillRect(-180, 120, 360, 6);
-
-  ctx.fillStyle = whiteTextColor;
-  ctx.font = '600 24px "Plus Jakarta Sans", sans-serif';
-  ctx.fillText('ZERO-SAG COLLAR ATELIER', 0, 170);
-  ctx.fillText('TOKYO × BERLIN × LA', 0, 210);
-
-  ctx.strokeStyle = 'rgba(197, 168, 128, 0.6)';
-  ctx.lineWidth = 3;
-  ctx.strokeRect(-200, 245, 400, 55);
-  ctx.fillStyle = accentColor;
-  ctx.font = 'bold 18px monospace';
-  ctx.fillText('LIMITED FUNK EDITION: 049 / 150', 0, 280);
-
   ctx.restore();
+}
+
+/**
+ * Creates or updates high-resolution graphic texture decal mapped onto the 3D t-shirt UVs
+ */
+function createFullShirtTexture(colorway, sharedCanvas = null) {
+  const canvas = sharedCanvas || document.createElement('canvas');
+  if (!sharedCanvas) {
+    canvas.width = 2048;
+    canvas.height = 2048;
+  }
+  renderShirtCanvas(canvas, colorway);
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.anisotropy = 16;
   texture.flipY = false;
   texture.needsUpdate = true;
-  return texture;
+  return { texture, canvas };
 }
 
 export default function ThreeTShirtCanvas({
@@ -163,6 +108,8 @@ export default function ThreeTShirtCanvas({
   const rendererRef = useRef(null);
   const modelRootRef = useRef(null);
   const targetMeshRef = useRef(null);
+  const textureCanvasRef = useRef(null);
+  const shirtTextureRef = useRef(null);
   const isDraggingRef = useRef(false);
   const pointerStartPos = useRef({ x: 0, rotY: 0, y: 0, rotX: 0 });
 
@@ -232,7 +179,9 @@ export default function ThreeTShirtCanvas({
 
     // 6. Load the Realistic 3D T-Shirt GLTF Model
     const loader = new GLTFLoader();
-    const shirtTexture = createFullShirtTexture(colorway);
+    const { texture: shirtTexture, canvas: sharedCanvas } = createFullShirtTexture(colorway);
+    textureCanvasRef.current = sharedCanvas;
+    shirtTextureRef.current = shirtTexture;
 
     loader.load(
       '/shirt_baked.glb',
@@ -258,7 +207,7 @@ export default function ThreeTShirtCanvas({
 
             child.material = new THREE.MeshStandardMaterial({
               color: new THREE.Color(colorway.colorHex),
-              map: shirtTexture,
+              map: shirtTextureRef.current || shirtTexture,
               roughness: 0.65,
               metalness: 0.02,
               roughnessMap: child.material?.roughnessMap || null,
@@ -346,18 +295,39 @@ export default function ThreeTShirtCanvas({
       cancelAnimationFrame(animId);
       window.removeEventListener('resize', handleResize);
       renderer.dispose();
-      shirtTexture.dispose();
+      if (shirtTextureRef.current) {
+        shirtTextureRef.current.dispose();
+      }
     };
   }, []);
 
-  // Update material and texture dynamically on colorway change
+  // Update material and texture dynamically on colorway change or print image load
   useEffect(() => {
-    if (!targetMeshRef.current) return;
+    const updateTexture = () => {
+      if (textureCanvasRef.current && shirtTextureRef.current) {
+        renderShirtCanvas(textureCanvasRef.current, colorway);
+        shirtTextureRef.current.needsUpdate = true;
+      }
+      if (targetMeshRef.current) {
+        targetMeshRef.current.material.color = new THREE.Color(colorway.colorHex);
+        targetMeshRef.current.material.needsUpdate = true;
+      }
+    };
 
-    const newTexture = createFullShirtTexture(colorway);
-    targetMeshRef.current.material.color = new THREE.Color(colorway.colorHex);
-    targetMeshRef.current.material.map = newTexture;
-    targetMeshRef.current.material.needsUpdate = true;
+    updateTexture();
+
+    const onImgLoad = () => updateTexture();
+    if (frontPrintImg && !frontPrintImg.complete) {
+      frontPrintImg.addEventListener('load', onImgLoad);
+    }
+    if (backPrintImg && !backPrintImg.complete) {
+      backPrintImg.addEventListener('load', onImgLoad);
+    }
+
+    return () => {
+      if (frontPrintImg) frontPrintImg.removeEventListener('load', onImgLoad);
+      if (backPrintImg) backPrintImg.removeEventListener('load', onImgLoad);
+    };
   }, [colorway]);
 
   // Sync external rotation
