@@ -3,6 +3,28 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 /**
+ * Renders high-voltage electric thunderbolt vector path onto canvas
+ */
+function drawThunderBolt(ctx, x, y, scale = 1, color = '#D4FF00') {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(scale, scale);
+  ctx.fillStyle = color;
+  ctx.shadowColor = color;
+  ctx.shadowBlur = 12;
+  ctx.beginPath();
+  ctx.moveTo(0, -22);
+  ctx.lineTo(-12, 1);
+  ctx.lineTo(-2, 1);
+  ctx.lineTo(-7, 22);
+  ctx.lineTo(13, -1);
+  ctx.lineTo(2, -1);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+/**
  * Creates high-resolution graphic texture decal mapped onto the 3D t-shirt UVs
  */
 function createFullShirtTexture(colorway) {
@@ -76,6 +98,10 @@ function createFullShirtTexture(colorway) {
   ctx.fillText('SUKIA', 0, -10);
   ctx.shadowBlur = 0; // reset shadow
 
+  // Electric Thunderbolts flanking SUKIA
+  drawThunderBolt(ctx, -210, -38, 1.25, accentColor);
+  drawThunderBolt(ctx, 210, -38, 1.25, secondaryAccent);
+
   // Horizontal Accent Bar
   ctx.fillStyle = accentColor;
   ctx.fillRect(-150, 35, 140, 6);
@@ -112,7 +138,7 @@ function createFullShirtTexture(colorway) {
   ctx.fillStyle = accentColor;
   ctx.font = 'bold 24px "Courier New", monospace';
   ctx.textAlign = 'center';
-  ctx.fillText('SUKIA DROP 01 // 150 PCS WORLDWIDE', 0, -200);
+  ctx.fillText('⚡ SUKIA THUNDER DROP // 150 PCS ⚡', 0, -200);
 
   // Big Bold White Back Text
   ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
@@ -124,6 +150,9 @@ function createFullShirtTexture(colorway) {
   ctx.fillText('NEVER NOT', 0, -10);
   ctx.fillText('GROOVY', 0, 80);
   ctx.shadowBlur = 0;
+
+  // Center Lightning Strike Vector
+  drawThunderBolt(ctx, 0, -15, 1.8, accentColor);
 
   // Gold Divider
   ctx.fillStyle = accentColor;

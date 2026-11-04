@@ -122,6 +122,64 @@ class SoundEngine {
     }
   }
 
+  // Atmospheric Thunder Strike & Rolling Sub-bass Rumble
+  playThunder() {
+    if (this.isMuted) return;
+    this.init();
+    if (!this.ctx) return;
+
+    try {
+      const now = this.ctx.currentTime;
+      
+      // 1. Initial Electric Crack / Lightning Snap (white noise burst)
+      const bufferSize = Math.floor(this.ctx.sampleRate * 1.5);
+      const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+      const output = noiseBuffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        output[i] = Math.random() * 2 - 1;
+      }
+      const whiteNoise = this.ctx.createBufferSource();
+      whiteNoise.buffer = noiseBuffer;
+
+      // Resonant lowpass filter to shape white noise into rolling thunder
+      const thunderFilter = this.ctx.createBiquadFilter();
+      thunderFilter.type = 'lowpass';
+      thunderFilter.frequency.setValueAtTime(800, now);
+      thunderFilter.frequency.exponentialRampToValueAtTime(70, now + 1.2);
+
+      const noiseGain = this.ctx.createGain();
+      noiseGain.gain.setValueAtTime(0.001, now);
+      // Sharp lightning crack
+      noiseGain.gain.linearRampToValueAtTime(0.09, now + 0.04);
+      noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.4);
+
+      whiteNoise.connect(thunderFilter);
+      thunderFilter.connect(noiseGain);
+      noiseGain.connect(this.ctx.destination);
+
+      // 2. Deep Sub-bass Rumble (sub-oscillator 65Hz rolling to 30Hz)
+      const subOsc = this.ctx.createOscillator();
+      const subGain = this.ctx.createGain();
+      subOsc.type = 'triangle';
+      subOsc.frequency.setValueAtTime(65, now);
+      subOsc.frequency.exponentialRampToValueAtTime(32, now + 1.6);
+
+      subGain.gain.setValueAtTime(0.001, now);
+      subGain.gain.linearRampToValueAtTime(0.07, now + 0.1);
+      subGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.8);
+
+      subOsc.connect(subGain);
+      subGain.connect(this.ctx.destination);
+
+      whiteNoise.start(now);
+      whiteNoise.stop(now + 1.5);
+      subOsc.start(now);
+      subOsc.stop(now + 1.8);
+    } catch {
+      // AudioContext might be blocked or unavailable
+    }
+  }
+
   // Continuous subtle warm celestial drone / space ambience
   startAmbient() {
     if (this.isMuted || this.isPlayingAmbient) return;
@@ -193,6 +251,7 @@ export function useSoundFX() {
   const playClick = useCallback((freq, duration) => soundEngine.playClick(freq, duration), []);
   const playHover = useCallback(() => soundEngine.playHover(), []);
   const playSuccessChime = useCallback(() => soundEngine.playSuccessChime(), []);
+  const playThunder = useCallback(() => soundEngine.playThunder(), []);
 
   return {
     isMuted,
@@ -200,5 +259,6 @@ export function useSoundFX() {
     playClick,
     playHover,
     playSuccessChime,
+    playThunder,
   };
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, Sparkles, Layers, ChevronDown } from 'lucide-react';
+import { ArrowRight, Sparkles, Layers, ChevronDown, Zap } from 'lucide-react';
 import { useSoundFX } from '../../hooks/useSoundFX';
 import GarmentStage3D from './GarmentStage3D';
 
@@ -35,6 +35,22 @@ export default function HeroSection({ onExplore, onSelectCategory }) {
               <span className="funk-sticker inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#ff1f8f] text-white text-[11px] font-black uppercase tracking-wider rotate-2 hover:rotate-0 transition-transform shadow-[0_0_16px_rgba(255,31,143,0.35)] select-none">
                 <span>⚡ 360 GSM GROOVE</span>
               </span>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  playClick(900, 0.05);
+                  window.dispatchEvent(
+                    new CustomEvent('trigger-thunder', {
+                      detail: { x: window.innerWidth * 0.5, y: window.innerHeight * 0.35 }
+                    })
+                  );
+                }}
+                className="funk-sticker inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#00f0ff]/15 border border-[#00f0ff]/60 text-[#00f0ff] hover:bg-[#00f0ff] hover:text-black text-[11px] font-black uppercase tracking-wider -rotate-1 hover:rotate-0 transition-all shadow-[0_0_16px_rgba(0,240,255,0.35)] cursor-pointer active:scale-95"
+                title="Click to summon electric thunder strike"
+              >
+                <Zap className="w-3.5 h-3.5 animate-bounce" />
+                <span>⚡ STRIKE THUNDER</span>
+              </button>
             </div>
 
             {/* Live Drop Status Pill */}
